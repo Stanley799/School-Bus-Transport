@@ -1,4 +1,5 @@
 //testing the dbpostgres and node.js connection
+console.log('🧪 Starting server.js...');
 const express = require('express');
 const pool = require('./db_node'); //the connection file 
 

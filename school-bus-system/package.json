@@ -1,9 +1,10 @@
 {
   "name": "school-bus-system",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node source-code/server.js",
+    "dev": "nodemon source-code/server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,5 +14,9 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
+

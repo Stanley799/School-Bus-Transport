@@ -16,6 +16,51 @@ app.get('/', async (req, res) => {
   }
 });
 
+//table routes
+const adminRoutes = require('./source-code/routes/adminRoutes');
+app.use('/api/admins', adminRoutes);
+
+const attendanceRoutes = require('./source-code/routes/attendanceRoutes');
+app.use('/api/attendance', attendanceRoutes);
+//bus table
+const express = require('express');
+const app = express();
+const pool = require('./db_node');
+
+const busRoutes = require('./source-code/routes/busRoutes');
+//driver table
+const driverRoutes = require('./source-code/routes/driverRoute');
+app.use('/api/drivers', driverRoutes);
+//instructions table
+const instructionRoutes = require('./source-code/routes/instructionRoutes');
+app.use('/api/instructions', instructionRoutes);
+//message table
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(express.json());
+
+const messageRoute = require('./routes/messageRoute');
+app.use('/api/messages', messageRoute);
+
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
+//parent table
+const parentsRoute = require('./source-code/routes/parentsRoute');
+app.use('/api/parents', parentsRoute);
+
+
+app.use(express.json()); // to parse JSON bodies
+app.use('/api/buses', busRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(` Server running at http://localhost:${PORT}`);
+});
+
+
+app.listen(PORT, () => {
+  console.log(` Server running on http://localhost:${PORT}`);
 });

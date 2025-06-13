@@ -1,5 +1,6 @@
 const pool = require('../../db_node');
 
+
 // Create a new attendance record
 const createAttendance = async (trip_id, student_id, status) => {
   const query = `

@@ -1,5 +1,6 @@
 // this file handles all the interactions with the users table in the database
-const pool = require('../db_node');
+const pool = require('../../db_node');
+
 
 // Get all users
 const getAllUsers = async () => {

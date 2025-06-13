@@ -1,5 +1,6 @@
 const pool = require('../../db_node');
 
+
 // Create a new instruction
 const createInstruction = async (instruction) => {
   const { trip_id, admin_id, message } = instruction;

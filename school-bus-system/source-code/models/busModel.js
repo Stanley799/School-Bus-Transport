@@ -1,5 +1,6 @@
 const pool = require('../../db_node');
 
+
 // CREATE a new bus
 const createBus = async (number_plate, status, capacity, driver_id) => {
   const result = await pool.query(

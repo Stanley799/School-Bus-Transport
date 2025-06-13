@@ -1,5 +1,6 @@
 const pool = require('../../db_node');
 
+
 // Create a new driver
 async function createDriver(driver) {
   const { user_id, driver_fname, driver_lname } = driver;

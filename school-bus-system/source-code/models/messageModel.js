@@ -1,5 +1,6 @@
 const pool = require('../../db_node');
 
+
 const createMessage = async (sender_id, receiver_id, content) => {
   const result = await pool.query(
     'INSERT INTO message (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING *',

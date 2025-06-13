@@ -1,6 +1,7 @@
 // source-code/models/parentsModel.js
 const pool = require('../../db_node');
 
+
 async function createParent(user_id, parent_fname, parent_lname, address) {
   const query = `
     INSERT INTO parents (user_id, parent_fname, parent_lname, address)

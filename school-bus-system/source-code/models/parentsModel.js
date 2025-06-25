@@ -1,5 +1,5 @@
 // source-code/models/parentsModel.js
-const pool = require('../../db_node');
+const pool = require('../db_node');
 
 
 async function createParent(user_id, parent_fname, parent_lname, address) {

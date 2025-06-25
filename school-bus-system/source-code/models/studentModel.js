@@ -1,4 +1,4 @@
-const pool = require('../../db_node');
+const pool = require('../db_node');
 
 
 const createStudent = async (student) => {

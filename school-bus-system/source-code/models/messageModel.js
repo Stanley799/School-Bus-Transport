@@ -1,4 +1,4 @@
-const pool = require('../../db_node');
+const pool = require('../db_node');
 
 
 const createMessage = async (sender_id, receiver_id, content) => {

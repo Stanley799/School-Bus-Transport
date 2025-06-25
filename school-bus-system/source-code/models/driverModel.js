@@ -1,4 +1,4 @@
-const pool = require('../../db_node');
+const pool = require('../db_node');
 
 
 // Create a new driver

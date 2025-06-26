@@ -1,34 +1,24 @@
 //testing the dbpostgres and node.js connection
-//Start server and test database connection
+// Start server and test database connection
 console.log('Starting server.js...');
 
 const express = require('express');
+const cors = require('cors');
 const pool = require('./db_node'); // Only import once
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-//allows frontend requests
-const cors = require('cors')
+// Middleware should come first
 app.use(cors({
   origin: 'http://localhost:5173', // Vite default
-}))
+  credentials: true // allow credentials like cookies, tokens etc. (optional but helpful)
+}));
 
-//Middleware
-app.use(express.json()); // Use once at the top
+app.use(express.json()); // Parse JSON body from requests
 
-//Test DB connection route
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.send(`Database time: ${result.rows[0].now}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Database error');
-  }
-});
-
-//All Route imports
+// Import routes AFTER middleware
+const authenticationRoutes = require('./routes/authenticationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const attendanceRoutes = require('./routes/attendanceRoutes');
 const busRoutes = require('./routes/busRoutes');
@@ -41,8 +31,8 @@ const routeRoutes = require('./routes/routeRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 
-
-//Use routes
+//  Use routes
+app.use('/api/auth', authenticationRoutes); // make sure this matches what your frontend calls
 app.use('/api/administrators', adminRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/bus', busRoutes);
@@ -55,7 +45,18 @@ app.use('/api/route', routeRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/trip', tripRoutes);
 
-// Start server (only once!)
+// Test DB connection route
+app.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.send(`Database time: ${result.rows[0].now}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Database error');
+  }
+});
+
+// Start server
 app.listen(PORT, () => {
-  console.log(` Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

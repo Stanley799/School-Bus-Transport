@@ -1,5 +1,5 @@
 // this file handles all the interactions with the users table in the database
-const pool = require('../../db_node');
+const pool = require('../db_node');
 
 
 // Get all users
@@ -8,10 +8,15 @@ const getAllUsers = async () => {
   return result.rows;
 };
 
-// Get user by email
-const getUserByEmail = async (email) => {
-  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-  return result.rows[0];
+//Function to find a user by email
+const findUserByEmail = async (email) => {
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    return result.rows[0]; // return a single user object
+  } catch (error) {
+    console.error('Error finding user by email:', error);
+    throw error;
+  }
 };
 
 // Create new user
@@ -40,7 +45,7 @@ const deleteUser = async (id) => {
 
 module.exports = {
   getAllUsers,
-  getUserByEmail,
+  findUserByEmail,
   createUser,
   updateLoginStatus,
   deleteUser,

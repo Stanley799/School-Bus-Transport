@@ -1,1 +1,7 @@
 @import "tailwindcss";
+/* GPS Maps */
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+  z-index: 0;
+}

@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import StudentsPage from './pages/StudentsPage'
 import StudentsListPage from './pages/StudentsListPage'
 import AddStudentPage from './pages/AddStudentPage'
+import LiveUpdatePage from "./pages/LiveUpdatePage";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
           <Route path="/students/list" element={<StudentsListPage />} />
           <Route path="/students/add" element={<AddStudentPage />} />
           <Route path="students" element={<StudentsPage />} />
+           <Route path="/live" element={<LiveUpdatePage />} />
           {/* Add more child routes here later */}
         </Route>
       </Routes>

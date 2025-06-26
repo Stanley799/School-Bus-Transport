@@ -1,19 +1,19 @@
-// src/components/Navbar.jsx
-import { Link } from 'react-router-dom'
+// Navigation bar component
 
 export default function Navbar() {
   return (
-    <nav className="bg-blue-600 text-white px-6 py-4 shadow-md">
-      <div className="flex justify-between items-center max-w-6xl mx-auto">
-        <h1 className="text-xl font-bold">School Bus Tracker</h1>
-        <ul className="flex gap-6 text-sm md:text-base font-medium">
-          <li><Link to="/" className="hover:underline">Home</Link></li>
-          <li><Link to="/students" className="hover:underline">Students</Link></li>
-          <li><Link to="/trips" className="hover:underline">Trips</Link></li>
-          <li><Link to="/messages" className="hover:underline">Messages</Link></li>
-          <li><Link to="/reports" className="hover:underline">Reports</Link></li>
-        </ul>
+    <div className="bg-gray-700 p-4 flex justify-between items-center">
+      {/* Left side: circular logo placeholder */}
+      <div className="rounded-full bg-gray-400 w-10 h-10" />
+
+      {/* Right side: navigation buttons */}
+      <div className="flex gap-4 text-white text-xl items-center">
+        <a href="/" className="hover:underline">Home</a>
+        <a href="/login" className="hover:underline">Login</a>
+        <button title="Search">🔍</button>
+        <button title="Menu">≡</button>
       </div>
-    </nav>
-  )
+    </div>
+  );
 }
+

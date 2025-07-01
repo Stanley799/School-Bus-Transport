@@ -4,9 +4,9 @@ export default function AddStudentForm({ onAdd }) {
   const [formData, setFormData] = useState({
     student_fname: '',
     student_lname: '',
+    grade: '',
     stream: '',
-    admission: '',
-    parent_id: ''
+    admission: ''
   })
 
   const handleChange = (e) => {
@@ -21,9 +21,9 @@ export default function AddStudentForm({ onAdd }) {
     if (
       !formData.student_fname ||
       !formData.student_lname ||
+      !formData.grade ||
       !formData.stream ||
-      !formData.admission ||
-      !formData.parent_id
+      !formData.admission
     ) {
       alert('Please fill in all fields')
       return
@@ -36,9 +36,9 @@ export default function AddStudentForm({ onAdd }) {
     setFormData({
       student_fname: '',
       student_lname: '',
+      grade: '',
       stream: '',
-      admission: '',
-      parent_id: ''
+      admission: ''
     })
   }
 
@@ -64,14 +64,32 @@ export default function AddStudentForm({ onAdd }) {
         className="w-full border p-2 rounded"
       />
 
-      <input
-        type="text"
-        name="stream"
-        value={formData.stream}
-        onChange={handleChange}
-        placeholder="Stream"
-        className="w-full border p-2 rounded"
-      />
+<label className="block">
+  <span className="text-gray-700">Grade</span>
+  <select name="grade" onChange={handleChange} required className="input">
+    <option value="">Select Grade</option>
+    <option value="PP1">PP1</option>
+    <option value="PP2">PP2</option>
+    <option value="Grade 1">Grade 1</option>
+    <option value="Grade 2">Grade 2</option>
+    <option value="Grade 3">Grade 3</option>
+    <option value="Grade 4">Grade 4</option>
+    <option value="Grade 5">Grade 5</option>
+    <option value="Grade 6">Grade 6</option>
+  </select>
+</label>
+
+<label className="block">
+  <span className="text-gray-700">Stream</span>
+  <select name="stream" onChange={handleChange} required className="input">
+    <option value="">Select Stream</option>
+    <option value="North">North</option>
+    <option value="South">South</option>
+    <option value="East">East</option>
+    <option value="West">West</option>
+    <option value="Central">Central</option>
+  </select>
+</label>
 
       <input
         type="number"
@@ -79,15 +97,6 @@ export default function AddStudentForm({ onAdd }) {
         value={formData.admission}
         onChange={handleChange}
         placeholder="Admission Number"
-        className="w-full border p-2 rounded"
-      />
-
-      <input
-        type="number"
-        name="parent_id"
-        value={formData.parent_id}
-        onChange={handleChange}
-        placeholder="Parent ID"
         className="w-full border p-2 rounded"
       />
 

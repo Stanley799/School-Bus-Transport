@@ -1,80 +1,83 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
-export default function MessagesPage() {
-  const [messages, setMessages] = useState([]);
+export default function MessagePage() {
   const [formData, setFormData] = useState({
-    sender_id: '',
+    content: '',
     receiver_id: '',
-    message_content: '',
   });
 
-  useEffect(() => {
-    axios.get('http://localhost:5000/api/message')
-      .then((res) => setMessages(res.data))
-      .catch((err) => console.error('Error fetching messages:', err));
-  }, []);
+  const [status, setStatus] = useState('');
+  const [user, setUser] = useState(() => {
+    // Parse user info (saved during login/signup)
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+  });
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
-    axios.post('http://localhost:5000/api/message', formData)
-      .then((res) => {
-        alert('Message sent');
-        setMessages([...messages, res.data]);
-        setFormData({ sender_id: '', receiver_id: '', message_content: '' });
-      })
-      .catch((err) => console.error('Sending failed:', err));
+    setStatus('');
+
+    try {
+      const token = localStorage.getItem('token');
+
+      if (!user || !token) {
+        return setStatus('You must be logged in to send messages.');
+      }
+
+      // Add sender_id automatically from the logged-in user
+      const messagePayload = {
+        content: formData.content,
+        sender_id: user.id,
+        receiver_id: formData.receiver_id,
+      };
+
+      const res = await axios.post('http://localhost:5000/api/message', messagePayload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStatus('Message sent successfully');
+      setFormData({ content: '', receiver_id: '' });
+    } catch (error) {
+      console.error(error);
+      setStatus(error.response?.data?.message || 'Error sending message');
+    }
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Messages</h2>
-
-      <form onSubmit={handleSubmit} className="mb-6 space-y-2">
-        <input
-          type="number"
-          name="sender_id"
-          placeholder="Sender ID"
-          value={formData.sender_id}
+    <div className="max-w-xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Send Message</h1>
+      {status && <p className="text-red-500">{status}</p>}
+      <form onSubmit={handleSend} className="space-y-4">
+        <textarea
+          name="content"
+          placeholder="Enter your message"
+          value={formData.content}
           onChange={handleChange}
-          className="border px-2 py-1 w-full"
+          className="w-full border border-gray-300 p-2 rounded"
           required
         />
         <input
-          type="number"
           name="receiver_id"
           placeholder="Receiver ID"
           value={formData.receiver_id}
           onChange={handleChange}
-          className="border px-2 py-1 w-full"
+          className="w-full border border-gray-300 p-2 rounded"
           required
         />
-        <textarea
-          name="message_content"
-          placeholder="Type a message..."
-          value={formData.message_content}
-          onChange={handleChange}
-          className="border px-2 py-1 w-full"
-          required
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
           Send Message
         </button>
       </form>
-
-      <div>
-        {messages.map((msg, index) => (
-          <div key={index} className="bg-gray-100 p-3 rounded mb-2">
-            <p><strong>From:</strong> {msg.sender_id} <strong>To:</strong> {msg.receiver_id}</p>
-            <p>{msg.message_content}</p>
-            <p className="text-xs text-gray-500">{msg.timestamp}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

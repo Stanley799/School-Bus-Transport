@@ -12,8 +12,8 @@ const createTrip = async (req, res) => {
 
 const getAllTrips = async (req, res) => {
   try {
-    const trips = await tripModel.getAllTrips();
-    res.json(trips);
+    const trip = await tripModel.getAllTrips();
+    res.json(trip);
   } catch (error) {
     console.error('Error fetching trips:', error);
     res.status(500).json({ error: 'Internal server error' });

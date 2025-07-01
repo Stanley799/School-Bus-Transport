@@ -9,6 +9,7 @@ import LiveUpdatePage from "./pages/LiveUpdatePage";
 import MessagesPage from './pages/MessagesPage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import TripsPage from "./pages/TripsPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/driver" element={<h2>Driver Dashboard</h2>} />
         <Route path="/admin" element={<h2>Admin Dashboard</h2>} />
         <Route path="/signup" element={<SignUp />} />
+         <Route path="/trips" element={<TripsPage />} />
           {/* Add more child routes here later */}
         </Route>
       </Routes>

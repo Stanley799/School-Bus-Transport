@@ -24,9 +24,10 @@ export default function SignUp() {
     setMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/signup', formData);
+      // 1. Send signup data to backend
+      await axios.post('http://localhost:5000/api/auth/signup', formData);
 
-      // Automatically log the user in after sign up
+      // 2. Automatically log the user in
       const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
         email: formData.email,
         password: formData.password,
@@ -36,7 +37,7 @@ export default function SignUp() {
       localStorage.setItem('token', token);
       localStorage.setItem('role', user.role);
 
-      // Redirect based on role
+      // 3. Redirect based on role
       if (user.role === 'parent') window.location.href = '/parent';
       else if (user.role === 'driver') window.location.href = '/driver';
       else if (user.role === 'administrator') window.location.href = '/admin';
@@ -52,30 +53,83 @@ export default function SignUp() {
 
         {message && <p className="text-sm text-center text-red-500">{message}</p>}
 
-        <input name="name" placeholder="Full Name" onChange={handleChange} className="input" required />
-        <input name="email" placeholder="Email" type="email" onChange={handleChange} className="input" required />
-        <input name="password" placeholder="Password" type="password" onChange={handleChange} className="input" required />
-        <input name="phone" placeholder="Phone" onChange={handleChange} className="input" required />
+        <input
+          name="name"
+          value={formData.name}
+          placeholder="Full Name"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <input
+          name="email"
+          value={formData.email}
+          placeholder="Email"
+          type="email"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <input
+          name="password"
+          value={formData.password}
+          placeholder="Password"
+          type="password"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <input
+          name="phone"
+          value={formData.phone}
+          placeholder="Phone"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
 
-        <select name="role" onChange={handleChange} className="input">
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+        >
           <option value="parent">Parent</option>
           <option value="driver">Driver</option>
           <option value="administrator">Administrator</option>
         </select>
 
-        <input name="fname" placeholder="First Name" onChange={handleChange} className="input" required />
-        <input name="lname" placeholder="Last Name" onChange={handleChange} className="input" required />
+        <input
+          name="fname"
+          value={formData.fname}
+          placeholder="First Name"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
+        <input
+          name="lname"
+          value={formData.lname}
+          placeholder="Last Name"
+          onChange={handleChange}
+          className="input w-full p-2 border border-gray-300 rounded"
+          required
+        />
 
         {formData.role === 'parent' && (
           <input
             name="address"
+            value={formData.address}
             placeholder="Address (only for parents)"
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="input w-full p-2 border border-gray-300 rounded"
           />
         )}
 
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
           Sign Up
         </button>
       </form>

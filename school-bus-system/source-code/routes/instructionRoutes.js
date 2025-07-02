@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authenticate = require('../middlewares/authMiddleware');
 const instructionController = require('../controllers/instructionController');
+const { sendInstruction } = require('../controllers/instructionController'); 
 
 router.post('/', instructionController.createInstruction);
 router.get('/', instructionController.getAllInstructions);

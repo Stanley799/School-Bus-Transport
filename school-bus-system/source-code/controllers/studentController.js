@@ -5,11 +5,12 @@ const createStudent = async (req, res) => {
     const { student_fname, student_lname, grade, stream, admission, parent_id } = req.body;
 
    try {
-    const result = await pool.query(
-      `INSERT INTO students (student_fname, student_lname, grade, stream, grade, admission, parent_id)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [student_fname, student_lname, grade, stream, admission, parent_id]
-    );
+   const result = await pool.query(
+  `INSERT INTO students (student_fname, student_lname, grade, stream, admission, parent_id)
+   VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+  [student_fname, student_lname, grade, stream, admission, parent_id]
+);
+
 
     res.status(201).json({ message: 'Student created', student: result.rows[0] });
   } catch (err) {

@@ -9,7 +9,7 @@ export default function StudentsListPage() {
     // Fetch students from backend API
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/student'); // Make sure this route works
+        const response = await axios.get('http://localhost:5000/api/students'); 
         setStudents(response.data);
       } catch (error) {
         console.error('Error fetching students:', error);

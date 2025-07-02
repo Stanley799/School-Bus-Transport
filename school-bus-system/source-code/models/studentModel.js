@@ -1,15 +1,16 @@
 const pool = require('../db_node');
 
 
-const createStudent = async (student) => {
-  const { student_fname, student_lname, stream, admission, parent_id } = student;
-  const result = await pool.query(
-    `INSERT INTO students (student_fname, student_lname, stream, admission, parent_id)
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [student_fname, student_lname, stream, admission, parent_id]
-  );
-  return result.rows[0];
+const createStudent = async (req, res) => {
+  try {
+    const student = await studentModel.createStudent(req.body);
+    res.status(201).json({ message: 'Student created', student });
+  } catch (err) {
+    console.error('Error creating student:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
+
 
 const getAllStudents = async () => {
   const result = await pool.query('SELECT * FROM students');

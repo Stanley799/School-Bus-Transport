@@ -8,7 +8,8 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
+    console.log('Logging in...'); // Debug: confirm function runs
+    setError('Logging in...');
 
     try {
       const res = await axios.post('http://localhost:5000/api/auth/login', {
@@ -17,13 +18,16 @@ export default function Login() {
       });
 
       const { token, user } = res.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', user.role);
+
+      // Use sessionStorage instead of localStorage
+      sessionStorage.setItem('token', token);
+      sessionStorage.setItem('role', user.role);
 
       // Redirect based on role
       if (user.role === 'parent') window.location.href = '/parent';
       else if (user.role === 'driver') window.location.href = '/driver';
       else if (user.role === 'administrator') window.location.href = '/admin';
+      else window.location.href = '/'; // fallback
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Try again.');
     }

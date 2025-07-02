@@ -54,10 +54,26 @@ const deleteInstruction = async (req, res) => {
   }
 };
 
+// Send instruction to driver
+const sendInstruction = async (req, res) => {
+  const { driver_id, message } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO instructions (driver_id, message) VALUES ($1, $2) RETURNING *',
+      [driver_id, message]
+    );
+    res.status(201).json({ instruction: result.rows[0], message: 'Instruction sent successfully' });
+  } catch (err) {
+    console.error('Error sending instruction:', err);
+    res.status(500).json({ message: 'Failed to send instruction' });
+  }
+};
+
 module.exports = {
   createInstruction,
   getAllInstructions,
   getInstructionById,
   updateInstruction,
+  sendInstruction,
   deleteInstruction
 };

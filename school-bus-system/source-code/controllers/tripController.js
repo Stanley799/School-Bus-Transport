@@ -1,4 +1,5 @@
 const tripModel = require('../models/tripModel');
+const pool = require('../db_node');
 
 const createTrip = async (req, res) => {
   try {
@@ -12,11 +13,24 @@ const createTrip = async (req, res) => {
 
 const getAllTrips = async (req, res) => {
   try {
-    const trip = await tripModel.getAllTrips();
-    res.json(trip);
-  } catch (error) {
-    console.error('Error fetching trips:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    const result = await pool.query(`
+ SELECT 
+  t.id, t.trip_name, t.start, t.stop, t.trip_date, t.status,
+  b.bus_name, b.number_plate,
+  r.route_name, r.estimated_time,
+  d.driver_fname, d.driver_lname,
+  u.phone AS driver_phone
+FROM trip t
+JOIN bus b ON t.bus_id = b.id
+JOIN route r ON t.route_id = r.id
+JOIN drivers d ON t.driver_id = d.id
+JOIN users u ON d.user_id = u.id;
+
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching trips", err);
+    res.status(500).json({ error: "Failed to fetch trips" });
   }
 };
 

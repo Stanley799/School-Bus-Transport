@@ -39,7 +39,7 @@ app.use('/api/auth', authenticationRoutes); // make sure this matches what your 
 app.use('/api/administrators', adminRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/bus', busRoutes);
-app.use('/api/driver', driverRoutes);
+app.use('/api/drivers', driverRoutes);
 app.use('/api/instructions', instructionRoutes);
 app.use('/api/message', messageRoutes);
 app.use('/api/parents', parentsRoutes);

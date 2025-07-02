@@ -22,7 +22,7 @@ export default function MessagesPage() {
           setStatus('You must be logged in to send messages.');
           return;
         }
-        const res = await axios.get('http://localhost:5000/api/driver', {
+        const res = await axios.get('http://localhost:5000/api/drivers', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

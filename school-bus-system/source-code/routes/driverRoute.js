@@ -14,4 +14,5 @@ router.put('/:id', authMiddleware, driverController.updateDriver);
 router.delete('/:id', authMiddleware, driverController.deleteDriver);
 router.get('/', authMiddleware, driverController.getAllDrivers);
 
+
 module.exports = router;

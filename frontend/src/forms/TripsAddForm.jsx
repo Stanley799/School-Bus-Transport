@@ -3,31 +3,60 @@ import axios from "axios";
 
 export default function TripsAddForm({ onTripAdded, editingTrip }) {
   const [formData, setFormData] = useState({
-    trip_id: "",
+    trip_name: "",
     start: "",
     stop: "",
     trip_date: "",
     status: "",
-    bus_id: 1,
-    route_id: 1,
-    driver_id: 1,
+    bus_id: "",
+    route_id: "",
+    driver_id: "",
   });
 
-  // Load editing data into form
+  const [buses, setBuses] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+
   useEffect(() => {
+    fetchDropdownData();
+
     if (editingTrip) {
       setFormData({
-        trip_id: editingTrip.trip_id || "",
+        trip_name: editingTrip.trip_name || "",
         start: editingTrip.start || "",
         stop: editingTrip.stop || "",
         trip_date: editingTrip.trip_date || "",
         status: editingTrip.status || "",
-        bus_id: editingTrip.bus_id || 1,
-        route_id: editingTrip.route_id || 1,
-        driver_id: editingTrip.driver_id || 1,
+        bus_id: editingTrip.bus_id || "",
+        route_id: editingTrip.route_id || "",
+        driver_id: editingTrip.driver_id || "",
       });
     }
   }, [editingTrip]);
+
+  const fetchDropdownData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const [busRes, routeRes, driverRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/bus", config),
+        axios.get("http://localhost:5000/api/route", config),
+        axios.get("http://localhost:5000/api/drivers", config),
+      ]);
+
+      setBuses(busRes.data);
+      setRoutes(routeRes.data);
+      setDrivers(driverRes.data);
+    } catch (err) {
+      console.error("Failed to load dropdown data", err);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,136 +65,173 @@ export default function TripsAddForm({ onTripAdded, editingTrip }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      if (editingTrip) {
-        // Update existing trip
-        await axios.put(`http://localhost:5000/api/trip/${editingTrip.id}`, formData);
-      } else {
-        // Create new trip
-        await axios.post("http://localhost:5000/api/trip", formData);
-      }
+      const url = editingTrip
+        ? `http://localhost:5000/api/trip/${editingTrip.id}`
+        : "http://localhost:5000/api/trip";
 
-      onTripAdded(); // Refresh list and reset editing
+      const method = editingTrip ? axios.put : axios.post;
+
+      await method(url, formData);
+      onTripAdded();
       setFormData({
-        trip_id: "",
+        trip_name: "",
         start: "",
         stop: "",
         trip_date: "",
         status: "",
-        bus_id: 1,
-        route_id: 1,
-        driver_id: 1,
+        bus_id: "",
+        route_id: "",
+        driver_id: "",
       });
-    } catch (error) {
-      console.error("Failed to submit trip", error);
+    } catch (err) {
+      console.error("Failed to submit trip", err);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-100 p-4 rounded mb-6 max-w-xl">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-gray-100 p-4 rounded mb-6 max-w-xl"
+    >
       <h2 className="text-xl font-semibold mb-4 text-gray-800">
         {editingTrip ? "Edit Trip" : "Add New Trip"}
       </h2>
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="trip_id" className="block text-sm font-medium text-gray-700">Trip ID</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Trip Name
+          </label>
           <input
             type="text"
-            name="trip_id"
-            id="trip_id"
-            value={formData.trip_id}
+            name="trip_name"
+            value={formData.trip_name}
             onChange={handleChange}
-            required
             className="mt-1 block w-full p-2 border rounded"
+            required
           />
         </div>
 
         <div>
-          <label htmlFor="start" className="block text-sm font-medium text-gray-700">Start Time</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Start Time
+          </label>
           <input
             type="time"
             name="start"
-            id="start"
             value={formData.start}
             onChange={handleChange}
-            required
             className="mt-1 block w-full p-2 border rounded"
+            required
           />
         </div>
 
         <div>
-          <label htmlFor="stop" className="block text-sm font-medium text-gray-700">Stop Time</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Stop Time
+          </label>
           <input
             type="time"
             name="stop"
-            id="stop"
             value={formData.stop}
             onChange={handleChange}
-            required
             className="mt-1 block w-full p-2 border rounded"
+            required
           />
         </div>
 
         <div>
-          <label htmlFor="trip_date" className="block text-sm font-medium text-gray-700">Trip Date</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Trip Date
+          </label>
           <input
             type="date"
             name="trip_date"
-            id="trip_date"
             value={formData.trip_date}
             onChange={handleChange}
-            required
             className="mt-1 block w-full p-2 border rounded"
+            required
           />
         </div>
 
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Status
+          </label>
           <input
             type="text"
             name="status"
-            id="status"
             value={formData.status}
             onChange={handleChange}
             className="mt-1 block w-full p-2 border rounded"
           />
         </div>
 
+        {/* Dropdowns for bus, route, driver */}
         <div className="grid grid-cols-3 gap-4">
+          {/* Bus */}
           <div>
-            <label htmlFor="bus_id" className="block text-sm font-medium text-gray-700">Bus ID</label>
-            <input
-              type="number"
+            <label className="block text-sm font-medium text-gray-700">
+              Bus
+            </label>
+            <select
               name="bus_id"
-              id="bus_id"
               value={formData.bus_id}
               onChange={handleChange}
               className="mt-1 block w-full p-2 border rounded"
-            />
+              required
+            >
+              <option value="">-- Select Bus --</option>
+              {buses.map((bus) => (
+                <option key={bus.id} value={bus.id}>
+                  {bus.bus_name} - {bus.number_plate}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {/* Route */}
           <div>
-            <label htmlFor="route_id" className="block text-sm font-medium text-gray-700">Route ID</label>
-            <input
-              type="number"
+            <label className="block text-sm font-medium text-gray-700">
+              Route
+            </label>
+            <select
               name="route_id"
-              id="route_id"
               value={formData.route_id}
               onChange={handleChange}
               className="mt-1 block w-full p-2 border rounded"
-            />
+              required
+            >
+              <option value="">-- Select Route --</option>
+              {routes.map((route) => (
+                <option key={route.id} value={route.id}>
+                  {route.route_name} -{" "}
+                  {route.estimated_time?.minutes || "?"} mins
+                </option>
+              ))}
+            </select>
           </div>
+
+          {/* Driver */}
           <div>
-            <label htmlFor="driver_id" className="block text-sm font-medium text-gray-700">Driver ID</label>
-            <input
-              type="number"
+            <label className="block text-sm font-medium text-gray-700">
+              Driver
+            </label>
+            <select
               name="driver_id"
-              id="driver_id"
               value={formData.driver_id}
               onChange={handleChange}
               className="mt-1 block w-full p-2 border rounded"
-            />
+              required
+            >
+              <option value="">-- Select Driver --</option>
+              {drivers.map((driver) => (
+                <option key={driver.id} value={driver.id}>
+                {driver.driver_fname} {driver.driver_lname} ({driver.phone || driver.driver_phone || 'No Phone'})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

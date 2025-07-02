@@ -1,20 +1,52 @@
 const pool = require('../db_node');
 
+// Auto-generate trip_id like TRIP-20250702-4821
+function generateTripId() {
+  const now = new Date();
+  const yyyyMMdd = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `TRIP-${yyyyMMdd}-${random}`;
+}
 
 const createTrip = async (trip) => {
-  const { trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status } = trip;
+  const { start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name } = trip;
+  const trip_id = generateTripId(); // <-- Auto-generate trip_id
+
   const result = await pool.query(
-    `INSERT INTO trip (trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-    [trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status]
+    `INSERT INTO trip (trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+    [trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name]
   );
+
   return result.rows[0];
 };
 
+//function that gets all trips
 const getAllTrips = async () => {
-  const result = await pool.query('SELECT * FROM trip');
+  const result = await pool.query(`
+    SELECT 
+      t.id,
+      t.start,
+      t.stop,
+      t.trip_date,
+      t.status,
+      t.trip_name,
+      b.bus_name,
+      b.number_plate,
+      r.route_name,
+      r.estimated_time,
+      u.name AS driver_name,
+      u.phone AS driver_phone
+    FROM trip t
+    JOIN bus b ON t.bus_id = b.id
+    JOIN route r ON t.route_id = r.id
+    JOIN drivers d ON t.driver_id = d.id
+    JOIN users u ON d.user_id = u.id
+    ORDER BY t.trip_date DESC
+  `);
   return result.rows;
 };
+
 
 const getTripById = async (id) => {
   const result = await pool.query('SELECT * FROM trip WHERE id = $1', [id]);

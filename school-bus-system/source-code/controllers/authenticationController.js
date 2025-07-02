@@ -57,23 +57,17 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user by email (using model function)
     const user = await findUserByEmail(email);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Verify password
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
-    // Generate JWT token with user id and role
-    const token = jwt.sign(
-      {
-        id: user.id,
-        role: user.role,
-      },
-      'secret_key_here', // Replace with env variable in production
-      { expiresIn: '1d' }
-    );
+    console.log('JWT_SECRET in login:', process.env.JWT_SECRET);
+
+    // Create JWT payload and token
+    const payload = { id: user.id, role: user.role };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     // Fetch role-specific profile data
     let profile = {};
@@ -88,7 +82,7 @@ const login = async (req, res) => {
       profile = data.rows[0];
     }
 
-    // Return success response with token and user info
+    // Send a single response with token and user info
     return res.status(200).json({
       message: 'Login successful',
       token,
@@ -101,11 +95,13 @@ const login = async (req, res) => {
         ...profile
       }
     });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 module.exports = {
   login,

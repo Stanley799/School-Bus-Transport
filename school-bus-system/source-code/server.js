@@ -1,5 +1,6 @@
 //testing the dbpostgres and node.js connection
 // Start server and test database connection
+require('dotenv').config();
 console.log('Starting server.js...');
 
 const express = require('express');
@@ -8,6 +9,8 @@ const pool = require('./db_node'); // Only import once
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+
 
 // Middleware should come first
 app.use(cors({

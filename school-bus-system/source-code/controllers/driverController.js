@@ -1,5 +1,5 @@
 const driverModel = require('../models/driverModel');
-
+const pool = require('../db_node');
 // Create
 async function createDriver(req, res) {
   try {
@@ -11,7 +11,7 @@ async function createDriver(req, res) {
   }
 }
 
-// Read all
+// Get all
 async function getAllDrivers(req, res) {
   try {
     const drivers = await driverModel.getAllDrivers();

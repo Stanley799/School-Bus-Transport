@@ -19,9 +19,11 @@ export default function Login() {
 
       const { token, user } = res.data;
 
-      // Use sessionStorage instead of localStorage
-      sessionStorage.setItem('token', token);
-      sessionStorage.setItem('role', user.role);
+      // localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', user.role);
+
+      localStorage.setItem('user', JSON.stringify(user)); 
 
       // Redirect based on role
       if (user.role === 'parent') window.location.href = '/parent';

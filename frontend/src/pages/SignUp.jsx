@@ -36,6 +36,7 @@ export default function SignUp() {
       const { token, user } = loginRes.data;
       localStorage.setItem('token', token);
       localStorage.setItem('role', user.role);
+      localStorage.setItem('user', JSON.stringify(user)); 
 
       // 3. Redirect based on role
       if (user.role === 'parent') window.location.href = '/parent';

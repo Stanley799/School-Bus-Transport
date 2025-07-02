@@ -12,10 +12,12 @@ async function createDriver(driver) {
 }
 
 // Get all drivers
-async function getAllDrivers() {
-  const result = await pool.query('SELECT * FROM drivers');
+const getAllDrivers = async () => {
+  const result = await pool.query(
+    'SELECT user_id, driver_fname, driver_lname FROM drivers ORDER BY driver_fname'
+  );
   return result.rows;
-}
+};
 
 // Get a driver by ID
 async function getDriverById(id) {

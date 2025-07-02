@@ -1,33 +1,20 @@
 const messageModel = require('../models/messageModel');
 
 const sendMessage = async (req, res) => {
-
-
-
-// ✅ Controller to handle sending a message
-const sendMessage = async (req, res) => {
   const { receiver_id, content } = req.body;
-  const sender_id = req.user.id; // coming from the authenticate middleware
+  const sender_id = req.user.id; // from auth middleware
+
+  if (!content || !receiver_id) {
+    return res.status(400).json({ message: 'Content and receiver_id are required' });
+  }
 
   try {
-    const result = await pool.query(
-      'INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING *',
-      [sender_id, receiver_id, content]
-    );
-    res.status(201).json({ message: 'Message sent successfully', data: result.rows[0] });
+    // Use your message model's create function
+    const message = await messageModel.createMessage(sender_id, receiver_id, content);
+    res.status(201).json({ message: 'Message sent successfully', data: message });
   } catch (error) {
     console.error('Error sending message:', error);
     res.status(500).json({ message: 'Failed to send message' });
-  }
-};
-
-  try {
-    const { sender_id, receiver_id, content } = req.body;
-    const message = await messageModel.createMessage(sender_id, receiver_id, content);
-    res.status(201).json(message);
-  } catch (err) {
-    console.error('Create message error:', err);
-    res.status(500).json({ error: 'Failed to send message' });
   }
 };
 

@@ -1,4 +1,68 @@
+/* index.css */
 @import "tailwindcss";
+
+/* Reset base styles but keep layout stable */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  background-color: #0f172a; /* slate-900 */
+  color: white;
+}
+
+/* Feature Grid buttons */
+.feature-tile {
+  @apply rounded-lg p-5 w-full mb-6 shadow hover:scale-105 transition-transform;
+}
+
+.tile-trips {
+  @apply bg-blue-700;
+}
+
+.tile-messages {
+  @apply bg-green-700;
+}
+
+.tile-tracking {
+  @apply bg-slate-700;
+}
+
+.tile-students {
+  @apply bg-yellow-600;
+}
+
+/* Navigation cleanup */
+.navbar {
+  @apply bg-gray-800 p-4 flex justify-between items-center;
+}
+
+.navbar a {
+  @apply text-white hover:underline text-lg;
+}
+
+/* Hide overflow white borders */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Optional for consistent spacing */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Optional image style */
+.feature-img {
+  max-width: 100px;
+  max-height: 100px;
+  margin-right: 1rem;
+}
+
+
 /* GPS Maps */
 .leaflet-container {
   height: 400px;

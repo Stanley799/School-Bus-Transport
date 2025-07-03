@@ -1,33 +1,46 @@
-// The component containing the bottom buttons
-export default function BottomBar() {
-  return (
-    <div className="bg-slate-700 p-4 mt-6">
-      <div className="flex justify-center gap-4 mb-2">
-        <a
-          href="/attendance"
-          className="bg-white text-black px-4 py-2 rounded-full shadow"
-        >
-          Attendance
-        </a>
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-        <a
-          href="/students"
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg shadow transition"
+export default function BottomBar() {
+  const [latestTripId, setLatestTripId] = useState(null);
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/api/trip").then((res) => {
+      const trips = res.data;
+      if (trips.length > 0) {
+        setLatestTripId(trips[trips.length - 1].id);
+      }
+    });
+  }, []);
+
+  return (
+    <footer className="bg-slate-800 p-4 border-t border-slate-600">
+      <div className="flex justify-center flex-wrap gap-4">
+        {latestTripId && (
+          <Link
+            to={`/trip/${latestTripId}/attendance`}
+            className="bg-slate-400 hover:bg-blue-600 text-black px-4 py-2 rounded shadow"
+          >
+            Attendance
+          </Link>
+        )}
+        <Link
+          to="/students"
+          className="bg-slate-400 hover:bg-blue-600 text-black px-4 py-2 rounded shadow"
         >
           Student Dashboard
-        </a>
-
-        <a
-          href="/activity"
-          className="bg-gray-300 text-black px-4 py-2 rounded-full shadow"
+        </Link>
+        <Link
+          to="/activity"
+          className="bg-slate-400 hover:bg-blue-600 text-black px-4 py-2 rounded shadow"
         >
-          User Activity
-        </a>
+          Reports
+        </Link>
       </div>
 
-      <p className="text-center text-sm text-gray-300">
-        Feature set for specific users (Driver, Administrator, Parent)
+      <p className="text-center text-sm text-gray-400 mt-2">
+        Feature set for Drivers, Admins, and Parents
       </p>
-    </div>
-  );
-}
+    </footer>
+  )};

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-
-
 export default function TripsAddForm({ onTripAdded, editingTrip }) {
   const [formData, setFormData] = useState({
     trip_name: "",
@@ -39,7 +37,6 @@ export default function TripsAddForm({ onTripAdded, editingTrip }) {
   const fetchDropdownData = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +59,11 @@ export default function TripsAddForm({ onTripAdded, editingTrip }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const parsedValue = ["bus_id", "route_id", "driver_id"].includes(name)
+      ? parseInt(value) || ""
+      : value;
+
+    setFormData({ ...formData, [name]: parsedValue });
   };
 
   const handleSubmit = async (e) => {
@@ -94,160 +95,136 @@ export default function TripsAddForm({ onTripAdded, editingTrip }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-gray-100 p-4 rounded mb-6 max-w-xl"
+      className="bg-slate-800 text-white p-6 rounded-xl shadow max-w-3xl mx-auto"
     >
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">
+      <h2 className="text-xl font-semibold mb-6 text-center">
         {editingTrip ? "Edit Trip" : "Add New Trip"}
       </h2>
 
-      <div className="space-y-4">
+      <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Trip Name
-          </label>
+          <label className="block mb-1">Trip Name</label>
           <input
             type="text"
             name="trip_name"
             value={formData.trip_name}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded"
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Start Time
-          </label>
-          <input
-            type="time"
-            name="start"
-            value={formData.start}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Stop Time
-          </label>
-          <input
-            type="time"
-            name="stop"
-            value={formData.stop}
-            onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Trip Date
-          </label>
+          <label className="block mb-1">Trip Date</label>
           <input
             type="date"
             name="trip_date"
             value={formData.trip_date}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded"
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Status
-          </label>
+          <label className="block mb-1">Start Time</label>
+          <input
+            type="time"
+            name="start"
+            value={formData.start}
+            onChange={handleChange}
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Stop Time</label>
+          <input
+            type="time"
+            name="stop"
+            value={formData.stop}
+            onChange={handleChange}
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Status</label>
           <input
             type="text"
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="mt-1 block w-full p-2 border rounded"
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
           />
         </div>
 
-        {/* Dropdowns for bus, route, driver */}
-        <div className="grid grid-cols-3 gap-4">
-          {/* Bus */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Bus
-            </label>
-            <select
-              name="bus_id"
-              value={formData.bus_id}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border rounded"
-              required
-            >
-              <option value="">-- Select Bus --</option>
-              {buses.map((bus) => (
-                <option key={bus.id} value={bus.id}>
-                  {bus.bus_name} - {bus.number_plate}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block mb-1">Bus</label>
+          <select
+            name="bus_id"
+            value={formData.bus_id}
+            onChange={handleChange}
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
+            required
+          >
+            <option value="">-- Select Bus --</option>
+            {buses.map((bus) => (
+              <option key={bus.id} value={bus.id}>
+                {bus.bus_name} - {bus.number_plate}
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Route */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Route
-            </label>
-            <select
-              name="route_id"
-              value={formData.route_id}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border rounded"
-              required
-            >
-              <option value="">-- Select Route --</option>
-              {routes.map((route) => (
-                <option key={route.id} value={route.id}>
-                  {route.route_name} -{" "}
-                  {route.estimated_time?.minutes || "?"} mins
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block mb-1">Route</label>
+          <select
+            name="route_id"
+            value={formData.route_id}
+            onChange={handleChange}
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
+            required
+          >
+            <option value="">-- Select Route --</option>
+            {routes.map((route) => (
+              <option key={route.id} value={route.id}>
+                {route.route_name} - {route.estimated_time?.minutes || "?"} mins
+              </option>
+            ))}
+          </select>
+        </div>
 
-          {/* Driver */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Driver
-            </label>
-            <select
-              name="driver_id"
-              value={formData.driver_id}
-              onChange={handleChange}
-              className="mt-1 block w-full p-2 border rounded"
-              required
-            >
-              <option value="">-- Select Driver --</option>
-              {drivers.map((driver) => (
-                <option key={driver.id} value={driver.id}>
-                {driver.driver_fname} {driver.driver_lname} ({driver.phone || driver.driver_phone || 'No Phone'})
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="block mb-1">Driver</label>
+          <select
+            name="driver_id"
+            value={formData.driver_id}
+            onChange={handleChange}
+            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
+            required
+          >
+            <option value="">-- Select Driver --</option>
+            {drivers.map((driver) => (
+              <option
+                key={driver.id}
+                value={driver.id}
+              >
+                {driver.driver_fname} {driver.driver_lname} ({driver.phone || driver.driver_phone || "No Phone"})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
       <button
         type="submit"
-        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow"
       >
         {editingTrip ? "Update Trip" : "Add Trip"}
       </button>
-      
     </form>
-    
-    
   );
-
 }

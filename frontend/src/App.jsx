@@ -29,7 +29,7 @@ export default function App() {
         <Route path="/admin" element={<h2>Admin Dashboard</h2>} />
         <Route path="/signup" element={<SignUp />} />
          <Route path="/trips" element={<TripsPage />} />
-         <Route path="/trip/:tripId/attendance" element={<TripAttendancePage />} />
+         <Route path="/trips/:tripId/attendance" element={<TripAttendancePage />} />
 
           {/* Add more child routes here later */}
         </Route>

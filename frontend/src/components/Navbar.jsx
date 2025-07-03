@@ -1,19 +1,23 @@
-// Navigation bar component
+import { Link } from "react-router-dom";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Navbar() {
   return (
-    <div className="bg-gray-700 p-4 flex justify-between items-center">
-      {/* Left side: circular logo placeholder */}
-      <div className="rounded-full bg-gray-400 w-10 h-10" />
-
-      {/* Right side: navigation buttons */}
-      <div className="flex gap-4 text-white text-xl items-center">
-        <a href="/" className="hover:underline">Home</a>
-        <a href="/login" className="hover:underline">Login</a>
-        <button title="Search">🔍</button>
-        <button title="Menu">≡</button>
+    <nav className="bg-gray-800 text-white px-6 py-4 flex justify-between items-center shadow-md">
+      <div className="flex items-center gap-3">
+        <div className="rounded-full bg-yellow-400 w-10 h-10" />
+        <span className="text-xl font-bold">School Bus System</span>
       </div>
-    </div>
+
+      <div className="flex items-center gap-6">
+        <Link to="/" className="hover:underline">Home</Link>
+        <Link to="/Login" className="hover:underline">Login</Link>
+        <Link to="/SignUp" className="hover:underline">Sign Up</Link>
+        <Link to="/account" title="User Account">
+          <UserCircleIcon className="h-8 w-8 text-white hover:text-gray-300" />
+        </Link>
+      </div>
+    </nav>
   );
 }
 

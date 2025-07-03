@@ -10,6 +10,7 @@ import MessagesPage from './pages/MessagesPage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import TripsPage from "./pages/TripsPage";
+import TripAttendancePage from "./pages/TripAttendancePage";
 
 export default function App() {
   return (
@@ -28,6 +29,8 @@ export default function App() {
         <Route path="/admin" element={<h2>Admin Dashboard</h2>} />
         <Route path="/signup" element={<SignUp />} />
          <Route path="/trips" element={<TripsPage />} />
+         <Route path="/trip/:tripId/attendance" element={<TripAttendancePage />} />
+
           {/* Add more child routes here later */}
         </Route>
       </Routes>

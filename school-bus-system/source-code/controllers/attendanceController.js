@@ -53,6 +53,25 @@ const deleteAttendance = async (req, res) => {
   }
 };
 
+//for storing attendance record 
+const markAttendance = async (req, res) => {
+  const { tripId, records } = req.body;
+  try {
+    const queries = records.map(r =>
+      pool.query(
+        'INSERT INTO attendance (trip_id, student_id, status) VALUES ($1, $2, $3)',
+        [tripId, r.student_id, r.status]
+      )
+    );
+    await Promise.all(queries);
+    res.json({ message: 'Attendance saved successfully' });
+  } catch (error) {
+    console.error("Error saving attendance:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   createAttendance,
   getAllAttendance,

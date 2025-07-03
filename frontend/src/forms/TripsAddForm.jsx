@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+
+
 export default function TripsAddForm({ onTripAdded, editingTrip }) {
   const [formData, setFormData] = useState({
     trip_name: "",
@@ -242,6 +244,10 @@ export default function TripsAddForm({ onTripAdded, editingTrip }) {
       >
         {editingTrip ? "Update Trip" : "Add Trip"}
       </button>
+      
     </form>
+    
+    
   );
+
 }

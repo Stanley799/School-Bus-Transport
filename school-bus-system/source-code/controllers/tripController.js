@@ -76,6 +76,26 @@ const deleteTrip = async (req, res) => {
   }
 };
 
+
+//for the attendance
+const getStudentsForTrip = async (req, res) => {
+  const { tripId } = req.params;
+  try {
+    const result = await pool.query(`
+      SELECT s.id, s.student_fname, s.student_lname, s.grade, s.stream
+      FROM students s
+      JOIN parents p ON s.parent_id = p.id
+      JOIN trip t ON t.trip_id = $1
+    `, [tripId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching trip students", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 module.exports = {
   createTrip,
   getAllTrips,

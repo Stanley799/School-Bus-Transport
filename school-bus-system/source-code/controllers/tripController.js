@@ -95,6 +95,22 @@ const getStudentsForTrip = async (req, res) => {
   }
 };
 
+const getStudentsByTripId = async (req, res) => {
+  const { tripId } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT s.id, s.student_fname, s.student_lname, s.grade, s.stream
+       FROM students s
+       INNER JOIN trip t ON t.route_id = s.route_id
+       WHERE t.id = $1`,
+      [tripId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching students by trip:', err);
+    res.status(500).json({ error: 'Failed to fetch students for the trip.' });
+  }
+};
 
 module.exports = {
   createTrip,
@@ -102,4 +118,5 @@ module.exports = {
   getTripById,
   updateTrip,
   deleteTrip,
+  getStudentsByTripId
 };

@@ -8,18 +8,43 @@ function generateTripId() {
   return `TRIP-${yyyyMMdd}-${random}`;
 }
 
-const createTrip = async (trip) => {
-  const { start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name } = trip;
-  const trip_id = generateTripId(); // <-- Auto-generate trip_id
+//create trip function
+async function createTrip(data) {
+  const {
+    trip_name,
+    trip_date,
+    departure_time,
+    arrival_time,
+    status,
+    bus_id,
+    route_id,
+    driver_id
+  } = data;
+
+  const trip_id = generateTripId();
 
   const result = await pool.query(
-    `INSERT INTO trip (trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-    [trip_id, start, stop, trip_date, bus_id, route_id, driver_id, status, trip_name]
+    `INSERT INTO trip (
+      trip_id, trip_name, trip_date, "start", stop, status, bus_id, route_id, driver_id
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    RETURNING *`,
+    [
+      trip_id,
+      trip_name,
+      trip_date,
+      departure_time,
+      arrival_time,
+      status,
+      bus_id,
+      route_id,
+      driver_id
+    ]
   );
 
   return result.rows[0];
-};
+}
+
+
 
 //function that gets all trips
 const getAllTrips = async () => {

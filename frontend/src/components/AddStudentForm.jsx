@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
 export default function AddStudentForm({ onAdd }) {
   const [formData, setFormData] = useState({
@@ -7,17 +7,16 @@ export default function AddStudentForm({ onAdd }) {
     grade: '',
     stream: '',
     admission: ''
-  })
+  });
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    // Validate required fields
     if (
       !formData.student_fname ||
       !formData.student_lname ||
@@ -25,26 +24,27 @@ export default function AddStudentForm({ onAdd }) {
       !formData.stream ||
       !formData.admission
     ) {
-      alert('Please fill in all fields')
-      return
+      alert('Please fill in all fields');
+      return;
     }
 
-    // Call parent handler
-    onAdd(formData)
+    onAdd(formData);
 
-    // Clear form
     setFormData({
       student_fname: '',
       student_lname: '',
       grade: '',
       stream: '',
       admission: ''
-    })
-  }
+    });
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white shadow p-6 rounded space-y-4">
-      <h2 className="text-2xl font-bold text-center text-blue-600">Add New Student</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-xl mx-auto bg-gray-800 text-white shadow p-6 rounded-lg space-y-4"
+    >
+      <h2 className="text-2xl font-bold text-center text-blue-400">Add New Student</h2>
 
       <input
         type="text"
@@ -52,7 +52,7 @@ export default function AddStudentForm({ onAdd }) {
         value={formData.student_fname}
         onChange={handleChange}
         placeholder="First Name"
-        className="w-full border p-2 rounded"
+        className="w-full p-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-400"
       />
 
       <input
@@ -61,35 +61,47 @@ export default function AddStudentForm({ onAdd }) {
         value={formData.student_lname}
         onChange={handleChange}
         placeholder="Last Name"
-        className="w-full border p-2 rounded"
+        className="w-full p-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-400"
       />
 
-<label className="block">
-  <span className="text-gray-700">Grade</span>
-  <select name="grade" onChange={handleChange} required className="input">
-    <option value="">Select Grade</option>
-    <option value="PP1">PP1</option>
-    <option value="PP2">PP2</option>
-    <option value="Grade 1">Grade 1</option>
-    <option value="Grade 2">Grade 2</option>
-    <option value="Grade 3">Grade 3</option>
-    <option value="Grade 4">Grade 4</option>
-    <option value="Grade 5">Grade 5</option>
-    <option value="Grade 6">Grade 6</option>
-  </select>
-</label>
+      <label className="block">
+        <span className="text-gray-300">Grade</span>
+        <select
+          name="grade"
+          value={formData.grade}
+          onChange={handleChange}
+          className="w-full p-2 mt-1 rounded bg-gray-700 border border-gray-600 text-white"
+          required
+        >
+          <option value="">Select Grade</option>
+          <option value="PP1">PP1</option>
+          <option value="PP2">PP2</option>
+          <option value="Grade 1">Grade 1</option>
+          <option value="Grade 2">Grade 2</option>
+          <option value="Grade 3">Grade 3</option>
+          <option value="Grade 4">Grade 4</option>
+          <option value="Grade 5">Grade 5</option>
+          <option value="Grade 6">Grade 6</option>
+        </select>
+      </label>
 
-<label className="block">
-  <span className="text-gray-700">Stream</span>
-  <select name="stream" onChange={handleChange} required className="input">
-    <option value="">Select Stream</option>
-    <option value="North">North</option>
-    <option value="South">South</option>
-    <option value="East">East</option>
-    <option value="West">West</option>
-    <option value="Central">Central</option>
-  </select>
-</label>
+      <label className="block">
+        <span className="text-gray-300">Stream</span>
+        <select
+          name="stream"
+          value={formData.stream}
+          onChange={handleChange}
+          className="w-full p-2 mt-1 rounded bg-gray-700 border border-gray-600 text-white"
+          required
+        >
+          <option value="">Select Stream</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+          <option value="Central">Central</option>
+        </select>
+      </label>
 
       <input
         type="number"
@@ -97,15 +109,15 @@ export default function AddStudentForm({ onAdd }) {
         value={formData.admission}
         onChange={handleChange}
         placeholder="Admission Number"
-        className="w-full border p-2 rounded"
+        className="w-full p-2 rounded bg-gray-700 border border-gray-600 placeholder-gray-400"
       />
 
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
       >
         Submit
       </button>
     </form>
-  )
+  );
 }

@@ -51,9 +51,25 @@ const deleteMessage = async (req, res) => {
   }
 };
 
+//getting the conversation between two users
+const getConversation = async (req, res) => {
+  const userId = req.user.id;
+  const { otherUserId } = req.params;
+
+  try {
+    const result = await messageModel.getConversation(userId, otherUserId);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error('Error fetching conversation:', err);
+    res.status(500).json({ message: 'Failed to fetch conversation' });
+  }
+};
+
+
 module.exports = {
   sendMessage,
   getAllMessages,
   getMessageById,
-  deleteMessage
+  deleteMessage,
+  getConversation
 };

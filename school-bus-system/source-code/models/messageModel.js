@@ -23,9 +23,21 @@ const deleteMessage = async (id) => {
   await pool.query('DELETE FROM message WHERE message_id = $1', [id]);
 };
 
+const getConversation = async (userId1, userId2) => {
+  const result = await pool.query(
+    `SELECT * FROM message 
+     WHERE (sender_id = $1 AND receiver_id = $2)
+        OR (sender_id = $2 AND receiver_id = $1)
+     ORDER BY timestamp ASC`,
+    [userId1, userId2]
+  );
+  return result.rows;
+};
+
 module.exports = {
   createMessage,
   getAllMessages,
   getMessageById,
-  deleteMessage
+  deleteMessage,
+  getConversation
 };

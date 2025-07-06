@@ -19,6 +19,17 @@ const getAllAttendance = async (req, res) => {
   }
 };
 
+const getAttendanceByTripId = async (req, res) => {
+  const { tripId } = req.params;
+  try {
+    const result = await attendanceModel.getAttendanceByTripId(tripId); // make sure this exists
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching attendance by trip.' });
+  }
+};
+
+
 const getAttendanceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -56,11 +67,13 @@ const deleteAttendance = async (req, res) => {
 //for storing attendance record 
 const markAttendance = async (req, res) => {
   const { tripId, records } = req.body;
+  const driverId = req.user.id; // assuming auth middleware sets req.user
+
   try {
     const queries = records.map(r =>
       pool.query(
-        'INSERT INTO attendance (trip_id, student_id, status) VALUES ($1, $2, $3)',
-        [tripId, r.student_id, r.status]
+        'INSERT INTO attendance (trip_id, student_id, status, marked_by) VALUES ($1, $2, $3, $4)',
+        [tripId, r.student_id, r.status, driverId]
       )
     );
     await Promise.all(queries);
@@ -72,10 +85,13 @@ const markAttendance = async (req, res) => {
 };
 
 
+
 module.exports = {
   createAttendance,
   getAllAttendance,
+  getAttendanceByTripId,
   getAttendanceById,
   updateAttendance,
-  deleteAttendance
+  deleteAttendance,
+  markAttendance
 };

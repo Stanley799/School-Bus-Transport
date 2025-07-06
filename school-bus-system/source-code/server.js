@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 
 
+
 // Middleware should come first
 app.use(cors({
   origin: 'http://localhost:5173', // Vite default
@@ -56,6 +57,24 @@ app.get('/', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Database error');
+  }
+});
+
+//ttendance
+app.get('/api/attendance/mark-trip/:tripId', async (req, res) => {
+  const { tripId } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT a.id AS attendance_id, s.name, s.grade, s.stream, a.status
+       FROM attendance a
+       JOIN students s ON a.student_id = s.id
+       WHERE a.trip_id = $1`,
+      [tripId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

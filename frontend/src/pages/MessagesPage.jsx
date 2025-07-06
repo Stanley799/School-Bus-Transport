@@ -2,117 +2,114 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function MessagesPage() {
-  const [formData, setFormData] = useState({
-    content: '',
-    receiver_id: '',
-  });
-
+  const [formData, setFormData] = useState({ content: '', receiver_id: '' });
   const [drivers, setDrivers] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState('');
   const [user, setUser] = useState(() => {
-    const userData = localStorage.getItem('user');
-    return userData ? JSON.parse(userData) : null;
+    const data = localStorage.getItem('user');
+    return data ? JSON.parse(data) : null;
   });
+
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const token = localStorage.getItem('token');//this gets token from localStorage
-        if (!token) {
-          setStatus('You must be logged in to send messages.');
-          return;
-        }
         const res = await axios.get('http://localhost:5000/api/drivers', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setDrivers(res.data);
-      } catch (error) {
-        console.error('Error fetching drivers:', error);
-        setStatus('Failed to load drivers');
+      } catch (err) {
+        setStatus('Error fetching drivers');
       }
     };
 
     fetchDrivers();
-  }, []);
+  }, [token]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!formData.receiver_id) return;
+      try {
+        const res = await axios.get(`http://localhost:5000/api/message/conversation/${formData.receiver_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setMessages(res.data);
+      } catch (err) {
+        setStatus('Error loading messages');
+      }
+    };
+
+    fetchMessages();
+  }, [formData.receiver_id]);
 
   const handleSend = async (e) => {
     e.preventDefault();
-    setStatus('');
-
-    if (!user) {
-      setStatus('You must be logged in to send messages.');
-      return;
-    }
-
-    if (!formData.receiver_id) {
-      setStatus('Please select a driver to send message.');
-      return;
-    }
-
     try {
-      const token = localStorage.getItem('token');
-      const messagePayload = {
-        content: formData.content,
-        receiver_id: formData.receiver_id,
-      };
-
-      await axios.post('http://localhost:5000/api/message', messagePayload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await axios.post('http://localhost:5000/api/message', formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      setStatus('Message sent successfully');
-      setFormData({ content: '', receiver_id: '' });
-    } catch (error) {
-      console.error(error);
-      setStatus(error.response?.data?.message || 'Error sending message');
+      setFormData({ ...formData, content: '' }); // clear content only
+      // re-fetch messages
+      const res = await axios.get(`http://localhost:5000/api/message/conversation/${formData.receiver_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages(res.data);
+    } catch (err) {
+      setStatus('Failed to send message');
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Send Message</h1>
-      {status && <p className="text-red-500">{status}</p>}
+    <div className="min-h-screen bg-gray-900 text-white p-4">
+      <div className="max-w-2xl mx-auto space-y-4">
+        <h1 className="text-xl font-bold text-center">Messages</h1>
 
-      <form onSubmit={handleSend} className="space-y-4">
-        <textarea
-          name="content"
-          placeholder="Enter your message"
-          value={formData.content}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-          required
-        />
-
+        {/* Select Driver */}
         <select
           name="receiver_id"
           value={formData.receiver_id}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-2 rounded"
-          required
+          onChange={(e) => setFormData({ ...formData, receiver_id: e.target.value })}
+          className="w-full bg-gray-700 p-2 rounded"
         >
           <option value="">Select Driver</option>
-          {drivers.map((driver) => (
-            <option key={driver.user_id} value={driver.user_id}>
-              {driver.driver_fname} {driver.driver_lname}
+          {drivers.map((d) => (
+            <option key={d.user_id} value={d.user_id}>
+              {d.driver_fname} {d.driver_lname}
             </option>
           ))}
         </select>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Send Message
-        </button>
-      </form>
+        {/* Chat Box */}
+        <div className="bg-gray-800 p-4 rounded h-80 overflow-y-auto">
+          {messages.map((msg) => (
+            <div
+              key={msg.message_id}
+              className={`mb-2 p-2 rounded ${
+                msg.sender_id === user.id ? 'bg-blue-600 text-right ml-auto max-w-sm' : 'bg-gray-600 text-left max-w-sm'
+              }`}
+            >
+              {msg.content}
+              <div className="text-xs text-gray-300">{new Date(msg.timestamp).toLocaleString()}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Message Form */}
+        <form onSubmit={handleSend} className="flex gap-2">
+          <input
+            type="text"
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            placeholder="Type a message..."
+            className="flex-1 bg-gray-700 p-2 rounded"
+            required
+          />
+          <button className="bg-blue-600 p-2 rounded">Send</button>
+        </form>
+        {status && <p className="text-red-400 text-sm text-center">{status}</p>}
+      </div>
     </div>
   );
 }

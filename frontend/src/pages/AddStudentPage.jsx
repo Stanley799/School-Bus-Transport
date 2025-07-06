@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
-import AddStudentForm from '../components/AddStudentForm'
+import { useNavigate } from 'react-router-dom';
+import AddStudentForm from '../components/AddStudentForm';
 
 export default function AddStudentPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleAddStudent = async (studentData) => {
     try {
@@ -10,23 +10,23 @@ export default function AddStudentPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(studentData),
-      })
+      });
 
       if (response.ok) {
-        alert('Student added successfully!')
-        navigate('/students') // redirect back
+        alert('Student added successfully!');
+        navigate('/students');
       } else {
-        const error = await response.json()
-        alert('Error: ' + error.message)
+        const error = await response.json();
+        alert('Error: ' + error.message);
       }
     } catch (err) {
-      alert('Server Error: ' + err.message)
+      alert('Server Error: ' + err.message);
     }
-  }
+  };
 
   return (
-    <div className="p-10">
+    <div className="min-h-screen bg-gray-900 text-white p-10">
       <AddStudentForm onAdd={handleAddStudent} />
     </div>
-  )
+  );
 }

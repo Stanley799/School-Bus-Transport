@@ -1,230 +1,155 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-export default function TripsAddForm({ onTripAdded, editingTrip }) {
-  const [formData, setFormData] = useState({
-    trip_name: "",
-    start: "",
-    stop: "",
-    trip_date: "",
-    status: "",
-    bus_id: "",
-    route_id: "",
-    driver_id: "",
+export default function TripsAddForm() {
+  const initial = JSON.parse(sessionStorage.getItem('pendingTrip')) || {};
+  const [tripData, setTripData] = useState({
+    tripName: initial.tripName || '',
+    tripDate: initial.tripDate || '',
+    departureTime: initial.departureTime || '',
+    arrivalTime: initial.arrivalTime || '',
+    status: initial.status || 'scheduled',
+    busId: initial.busId || '',
+    routeId: initial.routeId || '',
+    driverId: initial.driverId || '',
+    attendanceList: initial.attendanceList || [],
+    attendanceCreated: initial.attendanceCreated || false,
   });
 
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [drivers, setDrivers] = useState([]);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
+
+  const canCreateAttendance = ['tripName', 'tripDate', 'departureTime', 'arrivalTime', 'busId', 'routeId', 'driverId']
+    .every(key => tripData[key]);
 
   useEffect(() => {
-    fetchDropdownData();
+    const config = { headers: { Authorization: `Bearer ${token}` } };
 
-    if (editingTrip) {
-      setFormData({
-        trip_name: editingTrip.trip_name || "",
-        start: editingTrip.start || "",
-        stop: editingTrip.stop || "",
-        trip_date: editingTrip.trip_date || "",
-        status: editingTrip.status || "",
-        bus_id: editingTrip.bus_id || "",
-        route_id: editingTrip.route_id || "",
-        driver_id: editingTrip.driver_id || "",
-      });
-    }
-  }, [editingTrip]);
+    axios.get('http://localhost:5000/api/bus', config)
+      .then(res => setBuses(Array.isArray(res.data) ? res.data : []))
+      .catch(err => console.error("Bus fetch failed:", err.response?.data || err.message));
 
-  const fetchDropdownData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+    axios.get('http://localhost:5000/api/route', config)
+      .then(res => setRoutes(Array.isArray(res.data) ? res.data : []))
+      .catch(err => console.error("Route fetch failed:", err.response?.data || err.message));
 
-      const [busRes, routeRes, driverRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/bus", config),
-        axios.get("http://localhost:5000/api/route", config),
-        axios.get("http://localhost:5000/api/drivers", config),
-      ]);
+    axios.get('http://localhost:5000/api/drivers', config)
+      .then(res => setDrivers(Array.isArray(res.data) ? res.data : []))
+      .catch(err => console.error("Driver fetch failed:", err.response?.data || err.message));
+  }, [token]);
 
-      setBuses(busRes.data);
-      setRoutes(routeRes.data);
-      setDrivers(driverRes.data);
-    } catch (err) {
-      console.error("Failed to load dropdown data", err);
-    }
+  const saveState = (partial) => {
+    const updated = { ...tripData, ...partial };
+    setTripData(updated);
+    sessionStorage.setItem('pendingTrip', JSON.stringify(updated));
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const parsedValue = ["bus_id", "route_id", "driver_id"].includes(name)
-      ? parseInt(value) || ""
-      : value;
+  const handleSubmit = async () => {
+    if (!tripData.attendanceCreated) {
+      return setError('Please create the attendance list first.');
+    }
 
-    setFormData({ ...formData, [name]: parsedValue });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
     try {
-      const url = editingTrip
-        ? `http://localhost:5000/api/trip/${editingTrip.id}`
-        : "http://localhost:5000/api/trip";
-
-      const method = editingTrip ? axios.put : axios.post;
-
-      await method(url, formData);
-      onTripAdded();
-      setFormData({
-        trip_name: "",
-        start: "",
-        stop: "",
-        trip_date: "",
-        status: "",
-        bus_id: "",
-        route_id: "",
-        driver_id: "",
+      const res = await axios.post('http://localhost:5000/api/trip', {
+        trip_name: tripData.tripName,
+        trip_date: tripData.tripDate,
+        departure_time: tripData.departureTime,
+        arrival_time: tripData.arrivalTime,
+        status: tripData.status,
+        bus_id: parseInt(tripData.busId),
+        route_id: parseInt(tripData.routeId),
+        driver_id: parseInt(tripData.driverId),
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+
+      sessionStorage.removeItem('pendingTrip');
+      alert('Trip created successfully!');
+      navigate('/trips');
     } catch (err) {
-      console.error("Failed to submit trip", err);
+      console.error(err);
+      setError('Trip submission failed.');
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-slate-800 text-white p-6 rounded-xl shadow max-w-3xl mx-auto"
-    >
-      <h2 className="text-xl font-semibold mb-6 text-center">
-        {editingTrip ? "Edit Trip" : "Add New Trip"}
-      </h2>
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex justify-center">
+      <form className="bg-gray-800 p-6 rounded-lg w-full max-w-xl space-y-6">
+        <h2 className="text-2xl font-bold text-center">Add Trip & Attendance</h2>
+        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block mb-1">Trip Name</label>
-          <input
-            type="text"
-            name="trip_name"
-            value={formData.trip_name}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
-          />
-        </div>
+        {/* Text Inputs */}
+        {[
+          { id: 'tripName', label: 'Trip Name', type: 'text' },
+          { id: 'tripDate', label: 'Date', type: 'date' },
+          { id: 'departureTime', label: 'Departure Time', type: 'time' },
+          { id: 'arrivalTime', label: 'Arrival Time', type: 'time' },
+        ].map(({ id, label, type }) => (
+          <div key={id}>
+            <label htmlFor={id} className="block mb-1">{label}</label>
+            <input
+              id={id}
+              type={type}
+              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+              value={tripData[id]}
+              onChange={e => saveState({ [id]: e.target.value })}
+              required
+            />
+          </div>
+        ))}
 
-        <div>
-          <label className="block mb-1">Trip Date</label>
-          <input
-            type="date"
-            name="trip_date"
-            value={formData.trip_date}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
-          />
-        </div>
+        {/* Dropdowns */}
+        {[
+          { id: 'busId', label: 'Bus', options: buses, getLabel: b => b.bus_name || b.number_plate },
+          { id: 'routeId', label: 'Route', options: routes, getLabel: r => r.route_name },
+          {
+            id: 'driverId', label: 'Driver', options: drivers,
+            getLabel: d => d.full_name || `${d.driver_fname || ''} ${d.driver_lname || ''}`
+          },
+        ].map(({ id, label, options, getLabel }) => (
+          <div key={id}>
+            <label htmlFor={id} className="block mb-1">Select {label}</label>
+            <select
+              id={id}
+              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
+              value={tripData[id]}
+              onChange={(e) => saveState({ [id]: e.target.value })}
+              required
+            >
+              <option value="">-- Select {label} --</option>
+              {options.map((opt) => (
+                <option key={opt.id} value={opt.id}>{getLabel(opt)}</option>
+              ))}
+            </select>
+          </div>
+        ))}
 
-        <div>
-          <label className="block mb-1">Start Time</label>
-          <input
-            type="time"
-            name="start"
-            value={formData.start}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Stop Time</label>
-          <input
-            type="time"
-            name="stop"
-            value={formData.stop}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Status</label>
-          <input
-            type="text"
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Bus</label>
-          <select
-            name="bus_id"
-            value={formData.bus_id}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
+        {/* Conditional Buttons */}
+        {!tripData.attendanceCreated && canCreateAttendance && (
+          <button
+            type="button"
+            onClick={() => navigate('/attendance/create')}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded"
           >
-            <option value="">-- Select Bus --</option>
-            {buses.map((bus) => (
-              <option key={bus.id} value={bus.id}>
-                {bus.bus_name} - {bus.number_plate}
-              </option>
-            ))}
-          </select>
-        </div>
+            Create Attendance List
+          </button>
+        )}
 
-        <div>
-          <label className="block mb-1">Route</label>
-          <select
-            name="route_id"
-            value={formData.route_id}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
+        {tripData.attendanceCreated && (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
           >
-            <option value="">-- Select Route --</option>
-            {routes.map((route) => (
-              <option key={route.id} value={route.id}>
-                {route.route_name} - {route.estimated_time?.minutes || "?"} mins
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1">Driver</label>
-          <select
-            name="driver_id"
-            value={formData.driver_id}
-            onChange={handleChange}
-            className="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white"
-            required
-          >
-            <option value="">-- Select Driver --</option>
-            {drivers.map((driver) => (
-              <option
-                key={driver.id}
-                value={driver.id}
-              >
-                {driver.driver_fname} {driver.driver_lname} ({driver.phone || driver.driver_phone || "No Phone"})
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded shadow"
-      >
-        {editingTrip ? "Update Trip" : "Add Trip"}
-      </button>
-    </form>
+            Submit Trip
+          </button>
+        )}
+      </form>
+    </div>
   );
 }

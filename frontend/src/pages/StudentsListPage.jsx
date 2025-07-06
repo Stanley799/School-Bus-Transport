@@ -6,10 +6,9 @@ export default function StudentsListPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch students from backend API
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/students'); 
+        const response = await axios.get('http://localhost:5000/api/students');
         setStudents(response.data);
       } catch (error) {
         console.error('Error fetching students:', error);
@@ -22,17 +21,20 @@ export default function StudentsListPage() {
   }, []);
 
   return (
-    <div className="p-10">
-      <h2 className="text-3xl font-bold text-blue-600 mb-4">Students List</h2>
+    <div className="min-h-screen bg-gray-900 text-white p-10">
+      <h2 className="text-3xl font-bold text-blue-400 mb-6">Students List</h2>
 
       {loading ? (
-        <p className="text-gray-500">Loading students...</p>
+        <p className="text-gray-400">Loading students...</p>
       ) : students.length === 0 ? (
-        <p className="text-red-500">No students found.</p>
+        <p className="text-red-400">No students found.</p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {students.map((student) => (
-            <li key={student.student_id} className="bg-white shadow p-4 rounded">
+            <li
+              key={student.student_id}
+              className="bg-gray-800 rounded-lg shadow p-4 border border-gray-700"
+            >
               <p><strong>Name:</strong> {student.student_fname} {student.student_lname}</p>
               <p><strong>Stream:</strong> {student.stream}</p>
               <p><strong>Admission #:</strong> {student.admission}</p>
@@ -44,4 +46,3 @@ export default function StudentsListPage() {
     </div>
   );
 }
-

@@ -1,17 +1,24 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/api"; // ✅ Centralized Axios instance
 
 export default function BottomBar() {
   const [latestTripId, setLatestTripId] = useState(null);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/trip").then((res) => {
-      const trips = res.data;
-      if (trips.length > 0) {
-        setLatestTripId(trips[trips.length - 1].id);
+    const fetchTrips = async () => {
+      try {
+        const res = await api.get("/trip");
+        const trips = res.data;
+        if (trips.length > 0) {
+          setLatestTripId(trips[trips.length - 1].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch latest trip:", err);
       }
-    });
+    };
+
+    fetchTrips();
   }, []);
 
   return (
@@ -32,7 +39,7 @@ export default function BottomBar() {
           Student Dashboard
         </Link>
         <Link
-          to="/activity"
+          to="/reports"
           className="bg-slate-400 hover:bg-blue-600 text-black px-4 py-2 rounded shadow"
         >
           Reports
@@ -43,4 +50,5 @@ export default function BottomBar() {
         Feature set for Drivers, Admins, and Parents
       </p>
     </footer>
-  )};
+  );
+}

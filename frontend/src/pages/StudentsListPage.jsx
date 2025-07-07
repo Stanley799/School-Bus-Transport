@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 export default function StudentsListPage() {
   const [students, setStudents] = useState([]);
@@ -8,7 +8,7 @@ export default function StudentsListPage() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/students');
+        const response = await api.get('/students');
         setStudents(response.data);
       } catch (error) {
         console.error('Error fetching students:', error);

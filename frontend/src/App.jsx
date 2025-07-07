@@ -13,7 +13,7 @@ import TripsPage from "./pages/TripsPage";
 import TripAttendancePage from "./pages/TripAttendancePage";
 import AttendanceCreatePage from './pages/AttendanceCreatePage'
 import TripsAddForm from "./forms/TripsAddForm"; // ✅ correct folder path
-
+import ReportsPage from './pages/ReportsPage';
 
 export default function App() {
   return (
@@ -35,6 +35,7 @@ export default function App() {
          <Route path="/trips/:tripId/attendance" element={<TripAttendancePage />} />
          <Route path="/attendance/create" element={<AttendanceCreatePage />} />
          <Route path="/trips/add" element={<TripsAddForm />} />
+         <Route path="/reports" element={<ReportsPage />} />
 
           {/* Add more child routes here later */}
         </Route>

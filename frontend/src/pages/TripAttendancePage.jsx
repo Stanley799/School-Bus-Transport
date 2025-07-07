@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 
 export default function TripAttendancePage() {
   const { tripId } = useParams();
@@ -8,7 +8,7 @@ export default function TripAttendancePage() {
   const [status, setStatus] = useState({}); // { student_id: "present" or "absent" }
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/trips/${tripId}/students`)
+    api.get(`/trips/${tripId}/students`)
       .then(res => setStudents(res.data))
       .catch(err => console.error('Error loading students:', err));
   }, [tripId]);
@@ -17,29 +17,19 @@ export default function TripAttendancePage() {
     setStatus(prev => ({ ...prev, [studentId]: newStatus }));
   };
 
-const handleSubmit = async () => {
-  const token = localStorage.getItem("token");
+  const handleSubmit = async () => {
+    const records = students.map(s => ({
+      student_id: s.id,
+      status: status[s.id] || 'absent'
+    }));
 
-  const records = students.map(s => ({
-    student_id: s.id,
-    status: status[s.id] || 'absent'
-  }));
-
-  try {
-    await axios.post(`http://localhost:5000/api/attendance`, {
-      tripId,
-      records
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    alert("Attendance submitted successfully");
-  } catch (err) {
-    alert("Failed to submit attendance");
-  }
-};
-
+    try {
+      await api.post('/attendance', { tripId, records });
+      alert("Attendance submitted successfully");
+    } catch (err) {
+      alert("Failed to submit attendance");
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-4 bg-white shadow-md rounded">

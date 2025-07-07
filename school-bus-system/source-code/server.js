@@ -35,6 +35,8 @@ const routeRoutes = require('./routes/routeRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tripRoutes = require('./routes/tripRoutes');
 
+
+
 //  Use routes
 app.use('/api/auth', authenticationRoutes); // make sure this matches what your frontend calls
 app.use('/api/administrators', adminRoutes);
@@ -48,6 +50,9 @@ app.use('/api/report', reportRoutes);
 app.use('/api/route', routeRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/trip', tripRoutes);
+app.use('/api', require('./routes/reportRoutes'));
+app.use('/api', require('./routes/tripRoutes'));
+
 
 // Test DB connection route
 app.get('/', async (req, res) => {

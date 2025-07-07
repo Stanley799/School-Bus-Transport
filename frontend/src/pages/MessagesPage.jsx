@@ -1,42 +1,36 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 export default function MessagesPage() {
   const [formData, setFormData] = useState({ content: '', receiver_id: '' });
   const [drivers, setDrivers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [status, setStatus] = useState('');
-  const [user, setUser] = useState(() => {
-    const data = localStorage.getItem('user');
-    return data ? JSON.parse(data) : null;
-  });
 
-  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user')) || null;
 
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/drivers', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get('/drivers');
         setDrivers(res.data);
       } catch (err) {
+        console.error("Error fetching drivers:", err);
         setStatus('Error fetching drivers');
       }
     };
 
     fetchDrivers();
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     const fetchMessages = async () => {
       if (!formData.receiver_id) return;
       try {
-        const res = await axios.get(`http://localhost:5000/api/message/conversation/${formData.receiver_id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get(`/message/conversation/${formData.receiver_id}`);
         setMessages(res.data);
       } catch (err) {
+        console.error("Error loading messages:", err);
         setStatus('Error loading messages');
       }
     };
@@ -47,16 +41,13 @@ export default function MessagesPage() {
   const handleSend = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/message', formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFormData({ ...formData, content: '' }); // clear content only
-      // re-fetch messages
-      const res = await axios.get(`http://localhost:5000/api/message/conversation/${formData.receiver_id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.post('/message', formData);
+      setFormData({ ...formData, content: '' });
+
+      const res = await api.get(`/message/conversation/${formData.receiver_id}`);
       setMessages(res.data);
     } catch (err) {
+      console.error("Failed to send message:", err);
       setStatus('Failed to send message');
     }
   };
@@ -87,11 +78,15 @@ export default function MessagesPage() {
             <div
               key={msg.message_id}
               className={`mb-2 p-2 rounded ${
-                msg.sender_id === user.id ? 'bg-blue-600 text-right ml-auto max-w-sm' : 'bg-gray-600 text-left max-w-sm'
+                msg.sender_id === user.id
+                  ? 'bg-blue-600 text-right ml-auto max-w-sm'
+                  : 'bg-gray-600 text-left max-w-sm'
               }`}
             >
               {msg.content}
-              <div className="text-xs text-gray-300">{new Date(msg.timestamp).toLocaleString()}</div>
+              <div className="text-xs text-gray-300">
+                {new Date(msg.timestamp).toLocaleString()}
+              </div>
             </div>
           ))}
         </div>
@@ -108,6 +103,7 @@ export default function MessagesPage() {
           />
           <button className="bg-blue-600 p-2 rounded">Send</button>
         </form>
+
         {status && <p className="text-red-400 text-sm text-center">{status}</p>}
       </div>
     </div>

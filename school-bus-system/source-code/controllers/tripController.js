@@ -112,11 +112,46 @@ const getStudentsByTripId = async (req, res) => {
   }
 };
 
+
+// NEW: Trip Reports for all roles
+const getTripReports = async (req, res) => {
+  const user = req.user;
+
+  let query = `
+    SELECT t.id, t.trip_name, t.trip_date, b.bus_name, r.route_name
+    FROM trip t
+    JOIN bus b ON t.bus_id = b.id
+    JOIN route r ON t.route_id = r.id
+  `;
+
+  if (user.role === 'driver') {
+    query += ` WHERE t.driver_id = $1`;
+  } else if (user.role === 'parent') {
+    query += `
+      JOIN attendance a ON t.id = a.trip_id
+      JOIN students s ON s.id = a.student_id
+      WHERE s.parent_id = $1
+    `;
+  }
+
+  try {
+    const result = user.role === 'administrator'
+      ? await pool.query(query)
+      : await pool.query(query, [user.id]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching reports:', err);
+    res.status(500).json({ error: 'Failed to fetch trip reports' });
+  }
+};
+
 module.exports = {
   createTrip,
   getAllTrips,
   getTripById,
   updateTrip,
   deleteTrip,
-  getStudentsByTripId
+  getStudentsByTripId,
+   getTripReports
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api'; // ✅ Use centralized Axios instance
 
 export default function ChatWindow({ otherUserId }) {
   const [messages, setMessages] = useState([]);
@@ -8,11 +8,12 @@ export default function ChatWindow({ otherUserId }) {
 
   useEffect(() => {
     const fetchConversation = async () => {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:5000/api/message/conversation/${otherUserId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMessages(res.data);
+      try {
+        const res = await api.get(`/message/conversation/${otherUserId}`);
+        setMessages(res.data);
+      } catch (err) {
+        console.error("Failed to load conversation:", err);
+      }
     };
 
     fetchConversation();
@@ -20,21 +21,22 @@ export default function ChatWindow({ otherUserId }) {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    await axios.post('http://localhost:5000/api/message', {
-      receiver_id: otherUserId,
-      content: newMsg
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      await api.post('/message', {
+        receiver_id: otherUserId,
+        content: newMsg
+      });
 
-    setMessages([...messages, {
-      sender_id: user.id,
-      receiver_id: otherUserId,
-      content: newMsg,
-      timestamp: new Date()
-    }]);
-    setNewMsg('');
+      setMessages([...messages, {
+        sender_id: user.id,
+        receiver_id: otherUserId,
+        content: newMsg,
+        timestamp: new Date()
+      }]);
+      setNewMsg('');
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    }
   };
 
   return (
@@ -62,6 +64,7 @@ export default function ChatWindow({ otherUserId }) {
           onChange={(e) => setNewMsg(e.target.value)}
           placeholder="Type a message"
           className="flex-1 p-2 rounded bg-gray-800 text-white"
+          required
         />
         <button type="submit" className="ml-2 bg-blue-500 px-4 py-2 rounded text-white">
           Send

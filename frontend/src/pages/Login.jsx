@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../utils/api'; 
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,16 +11,19 @@ export default function Login() {
     setError('Logging in...');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await api.post('/auth/login', {
         email,
         password,
       });
 
       const { token, user } = res.data;
 
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
+      localStorage.setItem('token', token); // ← this persists across sessions
+
+      sessionStorage.setItem('role', user.role);
       localStorage.setItem('role', user.role);
-      localStorage.setItem('user', JSON.stringify(user));
+
 
       if (user.role === 'parent') window.location.href = '/parent';
       else if (user.role === 'driver') window.location.href = '/driver';

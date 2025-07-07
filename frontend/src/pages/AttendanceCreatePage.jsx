@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api'; // ✅ Import centralized axios instance
 
 export default function AttendanceCreatePage() {
   const [students, setStudents] = useState([]);
@@ -8,9 +8,9 @@ export default function AttendanceCreatePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/students')
+    api.get('/students')
       .then(res => setStudents(res.data))
-      .catch(console.error);
+      .catch(err => console.error('Error fetching students:', err));
   }, []);
 
   const toggle = (id) => {

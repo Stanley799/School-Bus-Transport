@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api'; // ✅ Import centralized axios instance
 
 export default function TripsAddForm() {
   const initial = JSON.parse(sessionStorage.getItem('pendingTrip')) || {};
@@ -22,26 +22,23 @@ export default function TripsAddForm() {
   const [drivers, setDrivers] = useState([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
 
   const canCreateAttendance = ['tripName', 'tripDate', 'departureTime', 'arrivalTime', 'busId', 'routeId', 'driverId']
     .every(key => tripData[key]);
 
   useEffect(() => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-
-    axios.get('http://localhost:5000/api/bus', config)
+    api.get('/bus')
       .then(res => setBuses(Array.isArray(res.data) ? res.data : []))
       .catch(err => console.error("Bus fetch failed:", err.response?.data || err.message));
 
-    axios.get('http://localhost:5000/api/route', config)
+    api.get('/route')
       .then(res => setRoutes(Array.isArray(res.data) ? res.data : []))
       .catch(err => console.error("Route fetch failed:", err.response?.data || err.message));
 
-    axios.get('http://localhost:5000/api/drivers', config)
+    api.get('/drivers')
       .then(res => setDrivers(Array.isArray(res.data) ? res.data : []))
       .catch(err => console.error("Driver fetch failed:", err.response?.data || err.message));
-  }, [token]);
+  }, []);
 
   const saveState = (partial) => {
     const updated = { ...tripData, ...partial };
@@ -55,7 +52,7 @@ export default function TripsAddForm() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/trip', {
+      await api.post('/trip', {
         trip_name: tripData.tripName,
         trip_date: tripData.tripDate,
         departure_time: tripData.departureTime,
@@ -64,8 +61,6 @@ export default function TripsAddForm() {
         bus_id: parseInt(tripData.busId),
         route_id: parseInt(tripData.routeId),
         driver_id: parseInt(tripData.driverId),
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
 
       sessionStorage.removeItem('pendingTrip');

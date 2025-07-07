@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../utils/api";
 import TripsAddForm from "../forms/TripsAddForm";
 import { Link } from "react-router-dom";
 
@@ -13,7 +13,7 @@ export default function TripsPage() {
 
   const fetchTrips = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/trip");
+      const response = await api.get("/trip");
       setTrips(response.data);
     } catch (error) {
       console.error("Failed to fetch trips", error);
@@ -26,7 +26,7 @@ export default function TripsPage() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/trips/${id}`);
+      await api.delete(`/trips/${id}`);
       fetchTrips();
     } catch (error) {
       console.error("Failed to delete trip", error);
@@ -71,11 +71,9 @@ export default function TripsPage() {
                   <td className="p-3">{t.trip_date}</td>
                   <td className="p-3">{t.status}</td>
                   <td className="p-3">{t.bus_name} - {t.number_plate}</td>
-                  <td className="p-3">
-                    {typeof t.estimated_time === 'object'
-                      ? `${t.estimated_time.hours || 0}h ${t.estimated_time.minutes || 0}m`
-                      : t.estimated_time}
-                  </td>
+                  <td className="p-3">{typeof t.estimated_time === 'object'
+                    ? `${t.estimated_time.hours || 0}h ${t.estimated_time.minutes || 0}m`
+                    : t.estimated_time}</td>
                   <td className="p-3">{t.driver_name} ({t.driver_phone})</td>
                   <td className="p-3 space-x-2">
                     <button

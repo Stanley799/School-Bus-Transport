@@ -18,3 +18,16 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
+
+//redirect to login if session expires 
+api.interceptors.response.use(
+  res => res,
+  error => {
+    if (error.response?.status === 401) {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);

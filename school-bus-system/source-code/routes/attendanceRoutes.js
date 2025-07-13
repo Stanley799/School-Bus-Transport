@@ -1,16 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const attendanceController = require('../controllers/attendanceController');
-const pool = require('../db_node');
 const authenticate = require('../middlewares/authMiddleware');
 
+router.use(authenticate);
 
-router.post("/attendance", authenticate, attendanceController.markAttendance);
-router.post('/', authenticate, attendanceController.createAttendance);
-router.get('/', authenticate, attendanceController.getAllAttendance);
-router.get('/:id', authenticate, attendanceController.getAttendanceById);
-router.put('/:id', authenticate, attendanceController.updateAttendance);
-router.delete('/:id', authenticate, attendanceController.deleteAttendance);
-router.get('/trip/:tripId', authenticate, attendanceController.getAttendanceByTripId);
+// Attendance list creation
+router.post('/trip/:tripId/attendance-list', attendanceController.addStudentsToAttendanceList);
+
+// Mark attendance
+router.post('/trip/:tripId/attendance', attendanceController.markTripAttendance);
+
+
+// View attendance
+router.get('/', attendanceController.getAllAttendance);
+router.get('/:id', attendanceController.getAttendanceById);
+router.get('/trip/:tripId', attendanceController.getAttendanceByTripId);
+
+// Edit/delete attendance records
+router.put('/:id', attendanceController.updateAttendance);
+router.delete('/:id', attendanceController.deleteAttendance);
 
 module.exports = router;

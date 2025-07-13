@@ -65,7 +65,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-//ttendance
+//attendance
 app.get('/api/attendance/mark-trip/:tripId', async (req, res) => {
   const { tripId } = req.params;
   try {

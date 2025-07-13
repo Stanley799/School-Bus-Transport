@@ -1,15 +1,59 @@
+const pool = require('../db_node');
 const attendanceModel = require('../models/attendanceModel');
 
-const createAttendance = async (req, res) => {
+// Save list of students for a trip
+const addStudentsToAttendanceList = async (req, res) => {
+  const { tripId } = req.params;
+  const { studentIds } = req.body;
+
+  if (!Array.isArray(studentIds) || studentIds.length === 0) {
+    return res.status(400).json({ message: 'studentIds must be a non-empty array' });
+  }
+
   try {
-    const { trip_id, student_id, status } = req.body;
-    const newRecord = await attendanceModel.createAttendance(trip_id, student_id, status);
-    res.status(201).json(newRecord);
+    await pool.query('BEGIN');
+
+    for (const studentId of studentIds) {
+      await pool.query(`
+        INSERT INTO trip_attendance_list (trip_id, student_id)
+        VALUES ($1, $2)
+        ON CONFLICT (trip_id, student_id) DO NOTHING
+      `, [tripId, studentId]);
+    }
+
+    await pool.query('COMMIT');
+
+    res.status(201).json({ message: 'Students added to attendance list successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create attendance record.' });
+    await pool.query('ROLLBACK');
+    console.error('Error adding students to attendance list:', error);
+    res.status(500).json({ message: 'Failed to add students to attendance list' });
   }
 };
 
+// Mark student present/absent for a trip
+const markTripAttendance = async (req, res) => {
+  const { tripId } = req.params;
+  const { records } = req.body;
+
+  try {
+    for (const { student_id, status } of records) {
+      await pool.query(`
+        INSERT INTO attendance (trip_id, student_id, status)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (trip_id, student_id)
+        DO UPDATE SET status = EXCLUDED.status
+      `, [tripId, student_id, status]);
+    }
+
+    res.status(200).json({ message: 'Attendance submitted successfully' });
+  } catch (error) {
+    console.error('Error submitting attendance:', error);
+    res.status(500).json({ error: 'Failed to submit attendance' });
+  }
+};
+
+// View attendance records
 const getAllAttendance = async (req, res) => {
   try {
     const records = await attendanceModel.getAllAttendance();
@@ -22,21 +66,18 @@ const getAllAttendance = async (req, res) => {
 const getAttendanceByTripId = async (req, res) => {
   const { tripId } = req.params;
   try {
-    const result = await attendanceModel.getAttendanceByTripId(tripId); // make sure this exists
+    const result = await attendanceModel.getAttendanceByTripId(tripId);
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: 'Error fetching attendance by trip.' });
   }
 };
 
-
 const getAttendanceById = async (req, res) => {
   try {
     const { id } = req.params;
     const record = await attendanceModel.getAttendanceById(id);
-    if (!record) {
-      return res.status(404).json({ error: 'Record not found.' });
-    }
+    if (!record) return res.status(404).json({ error: 'Record not found.' });
     res.json(record);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch attendance.' });
@@ -64,34 +105,13 @@ const deleteAttendance = async (req, res) => {
   }
 };
 
-//for storing attendance record 
-const markAttendance = async (req, res) => {
-  const { tripId, records } = req.body;
-  const driverId = req.user.id; // assuming auth middleware sets req.user
-
-  try {
-    const queries = records.map(r =>
-      pool.query(
-        'INSERT INTO attendance (trip_id, student_id, status, marked_by) VALUES ($1, $2, $3, $4)',
-        [tripId, r.student_id, r.status, driverId]
-      )
-    );
-    await Promise.all(queries);
-    res.json({ message: 'Attendance saved successfully' });
-  } catch (error) {
-    console.error("Error saving attendance:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-
-
 module.exports = {
-  createAttendance,
+  addStudentsToAttendanceList,
+  markTripAttendance,
+  createAttendance: markTripAttendance,
   getAllAttendance,
   getAttendanceByTripId,
   getAttendanceById,
   updateAttendance,
-  deleteAttendance,
-  markAttendance
+  deleteAttendance
 };

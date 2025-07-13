@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import api from '../utils/api'; 
+import api from '../utils/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,26 +13,18 @@ export default function Login() {
     setError('Logging in...');
 
     try {
-      const res = await api.post('/auth/login', {
-        email,
-        password,
-      });
-
+      const res = await api.post('/auth/login', { email, password });
       const { token, user } = res.data;
 
-      sessionStorage.setItem('token', token);
-      localStorage.setItem('token', token); // ← this persists across sessions
-
-      sessionStorage.setItem('role', user.role);
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('role', user.role);
 
-
-      if (user.role === 'parent') window.location.href = '/parent';
-      else if (user.role === 'driver') window.location.href = '/driver';
-      else if (user.role === 'administrator') window.location.href = '/admin';
-      else window.location.href = '/';
+      toast.success('Login successful!');
+      window.location.href = '/'; // redirect to homepage
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Try again.');
+      setError(err.response?.data?.message || 'Login failed.');
+      toast.error(err.response?.data?.message || 'Login failed.');
     }
   };
 
@@ -41,33 +35,19 @@ export default function Login() {
         className="bg-gray-800 p-6 rounded-md shadow-md w-full max-w-md space-y-4"
       >
         <h2 className="text-2xl font-bold text-center">Login</h2>
-
         {error && <p className="text-sm text-center text-red-400">{error}</p>}
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded font-semibold"
-        >
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded font-semibold">
           Login
         </button>
+
+        <p className="text-center text-sm mt-4">
+          Don't have an account? <a href="/signup" className="text-blue-400 hover:underline">Sign up</a>
+        </p>
       </form>
     </div>
   );

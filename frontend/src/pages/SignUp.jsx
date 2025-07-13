@@ -1,13 +1,17 @@
-// src/pages/SignUp.jsx
 import { useState } from 'react';
 import api from '../utils/api';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
     role: 'parent',
+    phone: '',
+    fname: '',
+    lname: '',
+    address: ''
   });
 
   const [error, setError] = useState('');
@@ -27,16 +31,16 @@ export default function SignUp() {
       const res = await api.post('/auth/signup', formData);
       const { token, user } = res.data;
 
-      sessionStorage.setItem('token', token);
-      sessionStorage.setItem('role', user.role);
-      sessionStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('role', user.role);
 
-      if (user.role === 'parent') window.location.href = '/parent';
-      else if (user.role === 'driver') window.location.href = '/driver';
-      else if (user.role === 'administrator') window.location.href = '/admin';
-      else window.location.href = '/';
+      toast.success('Account created successfully!');
+      window.location.href = '/'; // go to homepage or dashboard
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed. Try again.');
+      const message = err.response?.data?.message || 'Signup failed.';
+      toast.error(message);
+      setError(message);
     }
   };
 
@@ -46,17 +50,33 @@ export default function SignUp() {
         <h2 className="text-2xl font-bold text-center">Sign Up</h2>
         {error && <p className="text-sm text-center text-red-400">{error}</p>}
 
-        <input name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" />
-        <input name="email" placeholder="Email" type="email" value={formData.email} onChange={handleChange} required className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" />
-        <input name="password" placeholder="Password" type="password" value={formData.password} onChange={handleChange} required className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" />
+        <input name="fname" placeholder="First Name" value={formData.fname} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input name="lname" placeholder="Last Name" value={formData.lname} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" required />
+        <input name="address" placeholder="Address (for parents)" value={formData.address} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white" />
 
-        <select name="role" value={formData.role} onChange={handleChange} className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white">
+        <select name="role" value={formData.role} onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-white">
           <option value="parent">Parent</option>
           <option value="driver">Driver</option>
           <option value="administrator">Administrator</option>
         </select>
 
-        <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded font-semibold">Sign Up</button>
+        <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded font-semibold">
+          Sign Up
+        </button>
+
+        <p className="text-center text-sm mt-4">
+          Already have an account? <a href="/login" className="text-blue-400 hover:underline">Login</a>
+        </p>
       </form>
     </div>
   );

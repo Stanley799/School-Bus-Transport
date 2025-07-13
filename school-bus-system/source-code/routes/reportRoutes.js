@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authenticate = require('../middlewares/authMiddleware');
 const pool = require('../db_node');
-const { generateTripPDF } = require('../utils/pdfGenerator'); // ✅ REQUIRED IMPORT
+const { generateTripPDF } = require('../utils/pdfGenerator');
 
 // GET all trips eligible for report, filtered by role
 router.get('/trip/reports', authenticate, async (req, res) => {

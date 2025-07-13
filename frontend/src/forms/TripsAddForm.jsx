@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api'; // ✅ Import centralized axios instance
+import api from '../utils/api';
 
 export default function TripsAddForm() {
   const initial = JSON.parse(sessionStorage.getItem('pendingTrip')) || {};
@@ -15,6 +15,7 @@ export default function TripsAddForm() {
     driverId: initial.driverId || '',
     attendanceList: initial.attendanceList || [],
     attendanceCreated: initial.attendanceCreated || false,
+    tripId: initial.tripId || null,
   });
 
   const [buses, setBuses] = useState([]);
@@ -27,17 +28,9 @@ export default function TripsAddForm() {
     .every(key => tripData[key]);
 
   useEffect(() => {
-    api.get('/bus')
-      .then(res => setBuses(Array.isArray(res.data) ? res.data : []))
-      .catch(err => console.error("Bus fetch failed:", err.response?.data || err.message));
-
-    api.get('/route')
-      .then(res => setRoutes(Array.isArray(res.data) ? res.data : []))
-      .catch(err => console.error("Route fetch failed:", err.response?.data || err.message));
-
-    api.get('/drivers')
-      .then(res => setDrivers(Array.isArray(res.data) ? res.data : []))
-      .catch(err => console.error("Driver fetch failed:", err.response?.data || err.message));
+    api.get('/bus').then(res => setBuses(res.data || []));
+    api.get('/route').then(res => setRoutes(res.data || []));
+    api.get('/drivers').then(res => setDrivers(res.data || []));
   }, []);
 
   const saveState = (partial) => {
@@ -46,13 +39,9 @@ export default function TripsAddForm() {
     sessionStorage.setItem('pendingTrip', JSON.stringify(updated));
   };
 
-  const handleSubmit = async () => {
-    if (!tripData.attendanceCreated) {
-      return setError('Please create the attendance list first.');
-    }
-
+  const createTripAndNavigate = async () => {
     try {
-      await api.post('/trip', {
+      const res = await api.post('/trip', {
         trip_name: tripData.tripName,
         trip_date: tripData.tripDate,
         departure_time: tripData.departureTime,
@@ -63,8 +52,40 @@ export default function TripsAddForm() {
         driver_id: parseInt(tripData.driverId),
       });
 
+      const tripId = res.data.tripId || res.data.id;
+      const updated = { ...tripData, tripId };
+      setTripData(updated);
+      sessionStorage.setItem('pendingTrip', JSON.stringify(updated));
+      navigate(`/attendance/create/${tripId}`); // ✅ updated
+    } catch (err) {
+      console.error(err);
+      setError('Failed to create trip before attendance.');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!tripData.attendanceCreated || !tripData.tripId) {
+      return setError('Please create the attendance list first.');
+    }
+
+    try {
+      await api.put(`/trip/${tripData.tripId}`, {
+        trip_name: tripData.tripName,
+        trip_date: tripData.tripDate,
+        departure_time: tripData.departureTime,
+        arrival_time: tripData.arrivalTime,
+        status: tripData.status,
+        bus_id: parseInt(tripData.busId),
+        route_id: parseInt(tripData.routeId),
+        driver_id: parseInt(tripData.driverId),
+      });
+
+      // ✅ Clear state
       sessionStorage.removeItem('pendingTrip');
-      alert('Trip created successfully!');
+      sessionStorage.removeItem('attendanceCreated');
+      sessionStorage.removeItem('attendanceList');
+
+      alert('Trip finalized successfully!');
       navigate('/trips');
     } catch (err) {
       console.error(err);
@@ -78,9 +99,7 @@ export default function TripsAddForm() {
         <h2 className="text-2xl font-bold text-center">Add Trip & Attendance</h2>
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-        {/* Text Inputs */}
-        {[
-          { id: 'tripName', label: 'Trip Name', type: 'text' },
+        {[{ id: 'tripName', label: 'Trip Name', type: 'text' },
           { id: 'tripDate', label: 'Date', type: 'date' },
           { id: 'departureTime', label: 'Departure Time', type: 'time' },
           { id: 'arrivalTime', label: 'Arrival Time', type: 'time' },
@@ -98,9 +117,7 @@ export default function TripsAddForm() {
           </div>
         ))}
 
-        {/* Dropdowns */}
-        {[
-          { id: 'busId', label: 'Bus', options: buses, getLabel: b => b.bus_name || b.number_plate },
+        {[{ id: 'busId', label: 'Bus', options: buses, getLabel: b => b.bus_name || b.number_plate },
           { id: 'routeId', label: 'Route', options: routes, getLabel: r => r.route_name },
           {
             id: 'driverId', label: 'Driver', options: drivers,
@@ -113,7 +130,7 @@ export default function TripsAddForm() {
               id={id}
               className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600"
               value={tripData[id]}
-              onChange={(e) => saveState({ [id]: e.target.value })}
+              onChange={e => saveState({ [id]: e.target.value })}
               required
             >
               <option value="">-- Select {label} --</option>
@@ -124,18 +141,17 @@ export default function TripsAddForm() {
           </div>
         ))}
 
-        {/* Conditional Buttons */}
-        {!tripData.attendanceCreated && canCreateAttendance && (
+        {!tripData.tripId && canCreateAttendance && (
           <button
             type="button"
-            onClick={() => navigate('/attendance/create')}
+            onClick={createTripAndNavigate}
             className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded"
           >
             Create Attendance List
           </button>
         )}
 
-        {tripData.attendanceCreated && (
+        {tripData.attendanceCreated && tripData.tripId && (
           <button
             type="button"
             onClick={handleSubmit}

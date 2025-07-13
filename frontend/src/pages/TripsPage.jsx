@@ -26,7 +26,7 @@ export default function TripsPage() {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/trips/${id}`);
+      await api.delete(`/trip/${id}`);
       fetchTrips();
     } catch (error) {
       console.error("Failed to delete trip", error);
@@ -111,7 +111,7 @@ export default function TripsPage() {
         {/* Attendance button */}
         {trips.length > 0 && (
           <div className="text-center mt-8">
-            <Link to={`/trip/${trips[trips.length - 1].id}/attendance`}>
+            <Link to={`/trips/${trips[trips.length - 1].id}/attendance`}>
               <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-3 rounded shadow-lg">
                 Take Attendance for Latest Trip
               </button>

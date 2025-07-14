@@ -1,0 +1,8 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Explicitly set JavaScript files to use LF
+*.js text eol=lf
+
+# Exclude node_modules from being tracked
+node_modules/** -text

@@ -13,8 +13,9 @@ export default function Navbar() {
         <Link to="/" className="hover:underline">Home</Link>
         <Link to="/Login" className="hover:underline">Login</Link>
         <Link to="/SignUp" className="hover:underline">Sign Up</Link>
-        <Link to="/account" title="User Account">
-          <UserCircleIcon className="h-8 w-8 text-white hover:text-gray-300" />
+        <Link to="/account">
+        <UserCircleIcon className="h-8 w-8 text-white hover:text-gray-300" />
+
         </Link>
       </div>
     </nav>

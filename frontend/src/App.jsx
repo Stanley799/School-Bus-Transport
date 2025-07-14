@@ -14,6 +14,7 @@ import TripAttendancePage from "./pages/TripAttendancePage";
 import AttendanceCreatePage from './pages/AttendanceCreatePage';
 import TripsAddForm from "./forms/TripsAddForm";
 import ReportsPage from './pages/ReportsPage';
+import UserAccountPage from './pages/UserAccountPage';
 
 export default function App() {
   return (
@@ -136,6 +137,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+              {/* other routes */}
+              <Route path="/account" element={<UserAccountPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

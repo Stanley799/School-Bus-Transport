@@ -34,7 +34,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const routeRoutes = require('./routes/routeRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tripRoutes = require('./routes/tripRoutes');
-
+const userRoutes = require('./routes/userRoutes'); 
 
 
 //  Use routes
@@ -50,8 +50,10 @@ app.use('/api/report', reportRoutes);
 app.use('/api/route', routeRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/trip', tripRoutes);
+app.use('/api/user', userRoutes); 
 app.use('/api', require('./routes/reportRoutes'));
 app.use('/api', require('./routes/tripRoutes'));
+
 
 
 // Test DB connection route
